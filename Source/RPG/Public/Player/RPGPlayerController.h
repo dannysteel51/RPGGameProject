@@ -1,0 +1,177 @@
+// Copyright Dan Stull
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/PlayerController.h"
+#include "GameplayTagContainer.h"
+#include "RPGPlayerController.generated.h"
+
+class UCustomMovementComponent;
+struct FInventoryItem;
+class UWidgetComponent;
+class ARPGWeapon;
+class UDamageTextComponent;
+class URPGInputConfig;
+class URPGUserWidget;
+struct FInputActionValue;
+class UInputMappingContext;
+class UInputAction;
+class URPGAbilitySystemComponent;
+
+/**
+ * 
+ */
+UCLASS()
+class RPG_API ARPGPlayerController : public APlayerController
+{
+	GENERATED_BODY()
+public:
+	ARPGPlayerController();
+
+	UFUNCTION(Blueprintable)
+	FHitResult LineTraceForSpells(FHitResult &OutHitResult) const;
+
+	UFUNCTION(Client, Reliable)
+	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter, bool bBlocked, bool bCriticalHit);
+
+
+protected:
+	virtual void BeginPlay() override;
+
+	virtual void SetupInputComponent() override;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsCharacterAttacking = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	bool bIsCharacterJumping = false;
+
+	UPROPERTY()
+	APlayerController* PlayerController;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnPauseGame();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnResumeGame();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	UUserWidget* AttributeMenu = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	TSubclassOf<UUserWidget> WidgetClass;
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void PauseGame();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void UnpauseGame();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	UUserWidget* AttributePauseMenu = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	TSubclassOf<UUserWidget> AttributePauseMenuClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	UUserWidget* SpellPauseMenu = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Menu")
+	TSubclassOf<UUserWidget> SpellPauseMenuClass;
+
+private:
+	
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputMappingContext> RPGContext;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> LookAction;
+	
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> JumpAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> PauseAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> SelectAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> ItemPickupAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> RunAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> ToggleWalkAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> DodgeAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> InventoryAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> ClimbAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> HeavyAttackAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> ComboAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> TargetLockAction;
+
+	// For the Pause Menu
+	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
+	bool bTabDown = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", Meta = (AllowPrivateAccess = true))
+	bool bIsTargeting = false;
+	
+	bool bMenuVisible;
+	
+	void TogglePauseMenu();
+	//void MenuSettings(bool bTabDown, bool bMenuVisible, bool bShowMouseCursor, FInputModeGameAndUI InputModeData);
+	
+	//bool bIsInAir;
+	
+	// Input Actions Callbacks
+	UFUNCTION(BlueprintCallable)
+	void Jump();
+	
+	void Move(const FInputActionValue& Value);
+	
+	void HandleGroundMovementInput(const FInputActionValue& Value);
+	void HandleClimbMovementInput(const FInputActionValue& Value);
+	
+	void Look(const FInputActionValue& Value);
+	void Select();
+	void TabDown();
+	void TabUp();
+	void Run();
+	void Dodge();
+	void RunStop();
+	void ClimbActionStarted(const FInputActionValue& Value);
+	void AbilityInputTagPressed(FGameplayTag InputTag);
+	void AbilityInputTagReleased(FGameplayTag InputTag);
+	void AbilityInputTagHeld(FGameplayTag InputTag);
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Input")
+	TObjectPtr<URPGInputConfig> InputConfig;
+
+	UPROPERTY()
+	TObjectPtr<URPGAbilitySystemComponent> RPGAbilitySystemComponent;
+
+	URPGAbilitySystemComponent* GetASC();
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
+	
+	
+};

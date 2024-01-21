@@ -169,6 +169,10 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
 	FGameplayAttributeData IncomingExperience;
 	ATTRIBUTE_ACCESSORS(URPGAttributeSet, IncomingExperience);
+
+	UPROPERTY(BlueprintReadOnly, Category = "Meta Attributes")
+	FGameplayAttributeData Block;
+	ATTRIBUTE_ACCESSORS(URPGAttributeSet, Block);
 	
 
 	UFUNCTION()

@@ -51,9 +51,6 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = Combat)
 	bool bHitReacting = false;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Combat)
-	float BaseWalkSpeed = 250.f;
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = Combat)
 	float LifeSpan = 2.5f;
 
@@ -67,8 +64,12 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void InitAbilityActorInfo() override;
 	virtual void InitializeDefaultAttributes() const override;
-	void SpawnItem() const;
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount) override;
+	
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SpawnItem();
 	void SpawnWeapon() const;
+	
 	void SpawnEffect() const;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "CharacterClassDefaults")
@@ -90,7 +91,7 @@ protected:
 	TSubclassOf<ARPGWeapon> WeaponClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
-	TSubclassOf<ARPGEffectActor> ItemClass;
+	TSubclassOf<AActor> ItemClass;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat", meta = (AllowPrivateAccess = "true"))
 	UNiagaraSystem* SpawnEffectParticle = nullptr;

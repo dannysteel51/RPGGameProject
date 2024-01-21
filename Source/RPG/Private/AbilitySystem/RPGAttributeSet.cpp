@@ -4,9 +4,7 @@
 #include "AbilitySystem/RPGAttributeSet.h"
 #include "RPGGameplayTags.h"
 #include "AbilitySystemBlueprintLibrary.h"
-#include "AIController.h"
 #include "GameplayEffectExtension.h"
-#include "VREditorMode.h"
 #include "AbilitySystem/RPGAbilitySystemBlueprintLibrary.h"
 #include "GameFramework/Character.h"
 #include "Interfaces/CombatInterface.h"
@@ -14,7 +12,6 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "Player/RPGPlayerController.h"
-#include "Widgets/Text/ISlateEditableTextWidget.h"
 
 URPGAttributeSet::URPGAttributeSet()
 {

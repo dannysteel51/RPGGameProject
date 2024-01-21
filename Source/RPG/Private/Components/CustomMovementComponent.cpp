@@ -2,6 +2,9 @@
 
 
 #include "Components/CustomMovementComponent.h"
+
+#include "MotionWarpingComponent.h"
+#include "VectorTypes.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Characters/RPGCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -20,6 +23,8 @@ void UCustomMovementComponent::BeginPlay()
 		OwningPlayerAnimInstance->OnMontageEnded.AddDynamic(this, &UCustomMovementComponent::OnClimbMontageEnded);
 		OwningPlayerAnimInstance->OnMontageBlendingOut.AddDynamic(this, &UCustomMovementComponent::OnClimbMontageEnded);
 	}
+
+	OwningPlayerCharacter = Cast<ARPGCharacter>(CharacterOwner);
 }
 
 void UCustomMovementComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -34,6 +39,8 @@ void UCustomMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovem
 	{
 		bOrientRotationToMovement = false;
 		CharacterOwner->GetCapsuleComponent()->SetCapsuleHalfHeight(45.f);
+
+		OnEnterClimbStateDelegate.ExecuteIfBound();
 	}
 	if(PreviousMovementMode == MOVE_Custom && PreviousCustomMode == ECustomMovementMode::Move_Climb)
 	{
@@ -43,6 +50,11 @@ void UCustomMovementComponent::OnMovementModeChanged(EMovementMode PreviousMovem
 		const FRotator DirtyRotation = UpdatedComponent->GetComponentRotation();
 		const FRotator CleanStandRotation = FRotator(0.f, DirtyRotation.Yaw, 0.f);
 		UpdatedComponent->SetRelativeRotation(CleanStandRotation);
+
+		StopMovementImmediately();
+		
+		OnExitClimbStateDelegate.ExecuteIfBound();
+		
 	}
 	Super::OnMovementModeChanged(PreviousMovementMode, PreviousCustomMode);
 }
@@ -175,11 +187,42 @@ void UCustomMovementComponent::ToggleClimbing(bool bEnabledClimb)
 		{
 			PlayClimbMontage(ClimbDownLedgeMontage);
 		}
+		else
+		{
+			TryStartVaulting();
+		}
 	}
-	else
+	if (!bEnabledClimb)
 	{
 		// Disable climbing
 		StopClimbing();
+	}
+}
+
+void UCustomMovementComponent::RequestHopping()
+{
+	const FVector UnRotatedLastInputVector =
+		UKismetMathLibrary::Quat_UnrotateVector(UpdatedComponent->GetComponentQuat(), GetLastInputVector());
+
+	Debug::Print(UnRotatedLastInputVector.GetSafeNormal().ToString(), FColor::Cyan, -1.f);
+
+	const float DotResult =
+		FVector::DotProduct(UnRotatedLastInputVector.GetSafeNormal(), FVector::UpVector);
+
+	Debug::Print(TEXT("Do Result: " + FString::SanitizeFloat(DotResult)));
+
+	if (DotResult >= 0.9)
+	{
+		Debug::Print(TEXT("Hop Up"), FColor::Cyan, -1.f);
+		HandleHopUp();
+	}
+	else if (DotResult <= -0.9)
+	{
+		Debug::Print(TEXT("Hop Down"), FColor::Cyan, -1.f);
+	}
+	else
+	{
+		Debug::Print(TEXT("InvalidInputRange"), FColor::Cyan, -1.f);
 	}
 }
 
@@ -365,6 +408,59 @@ bool UCustomMovementComponent::CheckCanClimbFromLedge()
 	return false;
 }
 
+void UCustomMovementComponent::TryStartVaulting()
+{
+	FVector  VaultStartPosition;
+	FVector  VaultLandPosition;
+	if (CanStartVaulting(VaultStartPosition, VaultLandPosition))
+	{
+		SetMotionWarpTarget(FName("VaultStartPoint"), VaultStartPosition);
+		SetMotionWarpTarget(FName("VaultLandPoint"), VaultLandPosition);
+
+		StartClimbing();
+		PlayClimbMontage(VaultMontage);
+	}
+}
+
+bool UCustomMovementComponent::CanStartVaulting(FVector& OutVaultStartPosition, FVector& OutVaultLandPosition)
+{
+	if (IsFalling()) return false;
+
+	OutVaultStartPosition = FVector::ZeroVector;
+	OutVaultLandPosition = FVector::ZeroVector;
+	const FVector ComponentLocation = UpdatedComponent->GetComponentLocation();
+	const FVector ComponentForward = UpdatedComponent->GetForwardVector();
+	const FVector ComponentDown = -UpdatedComponent->GetUpVector();
+	const FVector ComponentUp = UpdatedComponent->GetUpVector();
+
+	for (int32 i = 0; i < 5; i++)
+	{
+		const FVector Start = ComponentLocation + ComponentUp *100.f + ComponentForward * 100.f * (i + 1);
+
+		const FVector End = Start + ComponentDown * 100.f * (i + 1);
+
+		FHitResult VaultTraceHit = DoLineTraceSingleByObject(Start, End, true, true);
+
+		if (i == 0 && VaultTraceHit.bBlockingHit)
+		{
+			OutVaultStartPosition = VaultTraceHit.ImpactPoint;
+		}
+		if (i == 3 && VaultTraceHit.bBlockingHit)
+		{
+			OutVaultLandPosition = VaultTraceHit.ImpactPoint;
+		}
+	}
+
+	if (OutVaultStartPosition != FVector::ZeroVector && OutVaultLandPosition != FVector::ZeroVector)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 FQuat UCustomMovementComponent::GetClimbRotation(float DeltaTime)
 {
 	const FQuat CurrentQuat = UpdatedComponent->GetComponentQuat();
@@ -407,11 +503,45 @@ void UCustomMovementComponent::OnClimbMontageEnded(UAnimMontage* Montage, bool b
 		StopMovementImmediately();
 	}
 
-	if(Montage == ClimbToTopMontage)
+	if(Montage == ClimbToTopMontage || Montage == VaultMontage)
 	{
 		SetMovementMode(MOVE_Walking);
 	}
 		
+}
+
+void UCustomMovementComponent::SetMotionWarpTarget(const FName& InWarpTargetName, const FVector& InTargetPosition)
+{
+	if (!OwningPlayerCharacter) return;
+
+	OwningPlayerCharacter->GetMotionWarpingComponent()->AddOrUpdateWarpTargetFromLocation(InWarpTargetName, InTargetPosition);
+}
+
+void UCustomMovementComponent::HandleHopUp()
+{
+	FVector HopUpTargetPoint;
+	if (CanHopUp(HopUpTargetPoint))
+	{
+		SetMotionWarpTarget(FName("HopUpTargetPoint"), HopUpTargetPoint);
+		PlayClimbMontage(HopUpMontage);
+	}
+	else
+	{
+		Debug::Print(TEXT("Can't Hop Up"));
+	}
+}
+
+bool UCustomMovementComponent::CanHopUp(FVector& OutUpHopStartPosition)
+{
+	FHitResult HopUpHit = TraceFromEyeHeight(100.f, 100.f, true, true);
+	FHitResult SafetyLedgeHit = TraceFromEyeHeight(100.f, 150.f, true, true);
+
+	if (HopUpHit.bBlockingHit && SafetyLedgeHit.bBlockingHit)
+	{
+		OutUpHopStartPosition = HopUpHit.ImpactPoint;
+		return true;
+	}
+	return false;
 }
 
 bool UCustomMovementComponent::IsClimbing() const
@@ -436,13 +566,13 @@ bool UCustomMovementComponent::TraceClimbableSurfaces()
 	return !ClimbableSurfacesTracedResults.IsEmpty();
 }
 
-FHitResult UCustomMovementComponent::TraceFromEyeHeight(float TraceDistance, float TraceStartOffset)
+FHitResult UCustomMovementComponent::TraceFromEyeHeight(float TraceDistance, float TraceStartOffset, bool bShowDebugShape , bool DrawPersistentShapes )
 {
 	const FVector ComponentLocation = UpdatedComponent->GetComponentLocation();
 	const FVector EyeHeightOffset = UpdatedComponent->GetUpVector() * (CharacterOwner->BaseEyeHeight + TraceStartOffset);
 	const FVector Start = ComponentLocation + EyeHeightOffset;
 	const FVector End = Start + UpdatedComponent->GetForwardVector() * TraceDistance;
-	return DoLineTraceSingleByObject(Start, End);
+	return DoLineTraceSingleByObject(Start, End, bShowDebugShape, DrawPersistentShapes);
 }
 
 #pragma endregion

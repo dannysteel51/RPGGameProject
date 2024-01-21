@@ -42,6 +42,11 @@ FDamageEffectParams URPGDamageGameplayAbility::MakeDamageEffectParamsFromClassDe
 	return Params;
 }
 
+float URPGDamageGameplayAbility::GetDamageAtLevel() const
+{
+	return Damage.GetValueAtLevel(GetAbilityLevel());
+}
+
 FTaggedMontage URPGDamageGameplayAbility::GetRandomTaggedMontageFromArray(const TArray<FTaggedMontage>& AttackMontages) const
 {
 	if (AttackMontages.Num() > 0)

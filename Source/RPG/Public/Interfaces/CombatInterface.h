@@ -13,8 +13,10 @@ class ARPGWeapon;
 class UNiagaraSystem;
 struct FGameplayTag;
 
+
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeadActor);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*);
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeadActor);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathSigniture, AActor*, DeadActor);
 
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -67,6 +69,8 @@ public:
 
 	virtual void Die(const FVector& DeathImpulse) = 0;
 
+	virtual FOnDeathSigniture& GetOnDeathDelegate() = 0;
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsDead() const;
 
@@ -95,12 +99,15 @@ public:
 	ARPGWeapon* GetEquippedWeapon();
 
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate () = 0;
-	virtual FOnDeath GetOnDeathDelegate() = 0;
+	
+	//virtual FOnDeath GetOnDeathDelegate() = 0;
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetInShockLoop(bool bInLoop);
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetInBlockLoop(bool bInLoop);
-	
+
+	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
+	void SetInBowShotLoop(bool bInLoop);
 };

@@ -96,6 +96,9 @@ void FRPGGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.InputTag_Block = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("InputTag.Block"),FString("Input Tag for Blocking"));
 
+	GameplayTags.InputTag_BowShot = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("InputTag.BowShot"),FString("Input Tag for Bow Shot"));
+
 	// Combat
 	GameplayTags.Combat_LockOn = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Combat.LockOn"),FString("Tag for Locking on to a target"));

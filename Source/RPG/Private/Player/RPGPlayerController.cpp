@@ -12,6 +12,7 @@
 #include "GameFramework/Character.h"
 #include "Input/RPGInputComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "RPG/DebugHelper.h"
 #include "RPG/RPG.h"
 #include "UI/Widget/DamageTextComponent.h"
 
@@ -24,6 +25,8 @@ ARPGPlayerController::ARPGPlayerController()
 	//bIsInAir = GetCharacter()->GetCharacterMovement()->IsFalling();
 	PlayerController = nullptr;
 
+	//RPGCharacter = Cast<ARPGCharacter>(GetCharacter());
+	//CustomMovementComponent = Cast<UCustomMovementComponent>(RPGCharacter->GetCharacterMovement());
 }
 
 void ARPGPlayerController::BeginPlay()
@@ -31,12 +34,9 @@ void ARPGPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	checkf(RPGContext, TEXT("RPGContext is null in ARPGPlayerController::BeginPlay(), set on Playstate")); // Halts execution if RPGContext is null
+
+	AddInputMappingContext(RPGContext, 0);
 	
-	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
-	if (Subsystem)
-	{
-		Subsystem->AddMappingContext(RPGContext, 0);
-	}
 	checkf(AttributePauseMenuClass, TEXT("AttributePauseMenuClass is null in ARPGPlayerController blueprint"));
 	checkf(SpellPauseMenuClass, TEXT("SpellPauseMenuClass is null in ARPGPlayerController blueprint"));
 	
@@ -55,6 +55,11 @@ void ARPGPlayerController::BeginPlay()
         		SpellPauseMenu->SetVisibility(ESlateVisibility::Hidden);
         	}
 	}
+	if (UCustomMovementComponent* CustomMovementComponent = Cast<UCustomMovementComponent>(GetCharacter()->GetCharacterMovement()))
+	{
+		CustomMovementComponent->OnEnterClimbStateDelegate.BindUObject(this, &ARPGPlayerController::OnPlayEnterClimbState);
+		CustomMovementComponent->OnExitClimbStateDelegate.BindUObject(this, &ARPGPlayerController::OnPlayExitClimbState);
+	}
 }
 
 void ARPGPlayerController::SetupInputComponent()
@@ -62,12 +67,14 @@ void ARPGPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	URPGInputComponent* RPGInputComponent = CastChecked<URPGInputComponent>(InputComponent);
-	RPGInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::Move);
+	RPGInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::HandleGroundMovementInput);
+	RPGInputComponent->BindAction(ClimbMoveAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::HandleClimbMovementInput);
 	RPGInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::Look);
 	RPGInputComponent->BindAction(PauseAction, ETriggerEvent::Completed, this, &ARPGPlayerController::TabDown);
 	RPGInputComponent->BindAction(PauseAction, ETriggerEvent::Canceled, this, &ARPGPlayerController::TabUp);
-	RPGInputComponent->BindAction(ClimbAction, ETriggerEvent::Started, this, &ARPGPlayerController::ClimbActionStarted);
-
+	RPGInputComponent->BindAction(ClimbAction, ETriggerEvent::Started, this, &ARPGPlayerController::OnClimbActionStarted);
+	RPGInputComponent->BindAction(ClimbHopAction, ETriggerEvent::Started, this, &ARPGPlayerController::OnClimbHopActionStarted);
+	
 	/*
 	 * These are implemented in Blueprint now
 	 */
@@ -81,27 +88,43 @@ void ARPGPlayerController::SetupInputComponent()
 	RPGInputComponent->BindAbilityToActions(InputConfig, this, &ARPGPlayerController::AbilityInputTagPressed, &ARPGPlayerController::AbilityInputTagReleased, &ARPGPlayerController::AbilityInputTagHeld);
 }
 
-void ARPGPlayerController::Move(const FInputActionValue& Value)
+void ARPGPlayerController::OnPlayEnterClimbState()
+{
+	AddInputMappingContext(ClimbMappingContext, 1);
+}
+
+void ARPGPlayerController::OnPlayExitClimbState()
+{
+	RemoveInputMappingContext(ClimbMappingContext);
+}
+
+void ARPGPlayerController::AddInputMappingContext(UInputMappingContext* ContextToAdd, int32 InPriority)
+{
+	if (!ContextToAdd) return;
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	if (Subsystem)
+	{
+		Subsystem->AddMappingContext(ContextToAdd, InPriority);
+	}
+}
+
+void ARPGPlayerController::RemoveInputMappingContext(UInputMappingContext* ContextToRemove)
+{
+	if (!ContextToRemove) return;
+	UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
+	if (Subsystem)
+	{
+		Subsystem->RemoveMappingContext(ContextToRemove);
+	}
+}
+
+void ARPGPlayerController::HandleGroundMovementInput(const FInputActionValue& Value)
 {
 	if(bTabDown) return;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputPressed))
 	{
 		return;
 	}
-	UCustomMovementComponent* CustomMovementComponent = Cast<UCustomMovementComponent>(GetCharacter()->GetCharacterMovement());
-	if(!CustomMovementComponent) return;
-	if(CustomMovementComponent->IsClimbing())
-	{
-		HandleClimbMovementInput(Value);
-	}
-	else
-	{
-		HandleGroundMovementInput(Value);
-	}
-}
-
-void ARPGPlayerController::HandleGroundMovementInput(const FInputActionValue& Value)
-{
 	const FVector2D MovementVector = Value.Get<FVector2D>();
 	const FRotator Rotation = GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
@@ -165,7 +188,7 @@ void ARPGPlayerController::Jump()
 }
 
 
-void ARPGPlayerController::ClimbActionStarted(const FInputActionValue& Value)
+void ARPGPlayerController::OnClimbActionStarted(const FInputActionValue& Value)
 {
 	UCustomMovementComponent* CustomMovementComponent = Cast<UCustomMovementComponent>(GetCharacter()->GetCharacterMovement());
 	if(!CustomMovementComponent) return;
@@ -179,10 +202,18 @@ void ARPGPlayerController::ClimbActionStarted(const FInputActionValue& Value)
 	}
 }
 
+void ARPGPlayerController::OnClimbHopActionStarted(const FInputActionValue& Value)
+{
+	UCustomMovementComponent* CustomMovementComponent = Cast<UCustomMovementComponent>(GetCharacter()->GetCharacterMovement());
+	if(CustomMovementComponent)
+	{
+		CustomMovementComponent->RequestHopping();
+	}
+}
+
 void ARPGPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
 	if (bTabDown) return;
-	//bIsCharacterAttacking = true;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputPressed))
 	{
 		return;
@@ -193,7 +224,6 @@ void ARPGPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 void ARPGPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
 	if (bTabDown) return;
-	//bIsCharacterAttacking = false;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputReleased))
 	{
 		return;
@@ -204,7 +234,6 @@ void ARPGPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 void ARPGPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
 	if (bTabDown) return;
-	//bIsCharacterAttacking = true;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputHeld))
 	{
 		return;

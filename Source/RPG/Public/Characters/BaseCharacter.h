@@ -43,6 +43,7 @@ public:
 	virtual bool IsDead_Implementation() const override;
 	virtual FVector GetCombatSocketLocation_Implementation(const FGameplayTag& MontageTag) override;
 	virtual void Die(const FVector& DeathImpulse) override;
+	virtual FOnDeathSigniture& GetOnDeathDelegate() override;
 	virtual UAnimMontage* GetHitReactMontage_Implementation() override;
 	virtual TArray<FTaggedMontage> GetAttackMontages_Implementation() override;
 	virtual USkeletalMeshComponent* GetWeapon() override;
@@ -52,11 +53,12 @@ public:
 	virtual void AddToMinionCount_Implementation(int32 Amount) override;
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
 	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
-	virtual FOnDeath GetOnDeathDelegate() override;
+	//virtual FOnDeath GetOnDeathDelegate() override;
 	/* End Combat Interface */
 
 	FOnASCRegistered OnAscRegistered;
-	FOnDeath OnDeath;
+	FOnDeathSigniture OnDeathDelegate;
+	//FOnDeath OnDeath;
 
 	UFUNCTION(NetMulticast, Reliable)
 	virtual void MulticastHandleDeath(const FVector& DeathImpulse);
@@ -67,9 +69,14 @@ public:
 	UPROPERTY(EditAnywhere, Category = Combat)
 	TArray<FTaggedMontage> AttackMontages;
 
+	UPROPERTY(BlueprintReadOnly, Category = Combat)
+	bool bIsStunned = false;
 
+	
 protected:
 	virtual void BeginPlay() override;
+
+	virtual void StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount);
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Combat)
 	TObjectPtr<USkeletalMeshComponent> Weapon;
@@ -90,6 +97,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Combat)
 	bool bDead = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadwrite, Category = Combat)
+	float BaseWalkSpeed = 600.f;
 	
 	UPROPERTY()
 	TObjectPtr<UAbilitySystemComponent> AbilitySystemComponent;
@@ -108,7 +118,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Attributes")
 	TSubclassOf<UGameplayEffect> DefaultVitalAttributes;
 
+	UFUNCTION(BlueprintCallable)
 	void ApplyEffectToSelf(TSubclassOf<UGameplayEffect> GameEffectClass, float level) const;
+	
 	virtual void InitializeDefaultAttributes() const;
 	void AddCharacterAbilities();
 

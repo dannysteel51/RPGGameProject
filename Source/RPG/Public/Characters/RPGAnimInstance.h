@@ -69,4 +69,8 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
 	bool bInBlockLoop;
 	void GetInBlockLoop();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
+	bool bInBowShotLoop;
+	void GetInBowShotLoop();
 };

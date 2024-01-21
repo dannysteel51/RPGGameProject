@@ -47,12 +47,13 @@ public:
 	FGameplayTag InputTag_Passive_2;;
 	FGameplayTag InputTag_Combo;
 	FGameplayTag InputTag_Block;
-
-	FGameplayTag Combat_LockOn;
+	FGameplayTag InputTag_BowShot;
+	
 
 	// Meta Damage 
 	FGameplayTag Damage;
-
+	FGameplayTag Combat_LockOn;
+	
 	// DamageTypes
 	FGameplayTag Damage_Fire;
 	FGameplayTag Damage_Lightning;

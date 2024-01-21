@@ -7,6 +7,7 @@
 #include "Interfaces/PickupInterface.h"
 #include "Interfaces/PlayerInterface.h"
 #include "Items/Weapons/Weapon.h"
+
 #include "RPGCharacter.generated.h"
 
 class ARPGItem;
@@ -14,6 +15,7 @@ class ARPGWeapon;
 class UCameraComponent;
 class USpringArmComponent;
 class UCustomMovementComponent;
+class UMotionWarpingComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FEquipItemDelegateSigniture, int32, CurrentSlotIndex, int32, NewSlotIndex);
 
@@ -57,7 +59,8 @@ public:
 	/*
 	 * End PlayerInterface
 	 */
-
+	UMotionWarpingComponent* GetMotionWarpingComponent() const { return MotionWarpingComponent; }
+	
 	UCameraComponent* GetCameraComponent() const { return CameraComponent; }
 	
 	UAnimMontage* GetDodgeMontage() const { return DodgeMontage; }
@@ -68,7 +71,9 @@ public:
 
 	bool GetInShockLoop() const { return bInShockLoop; }
 	
-	bool GetInBlockLoop() { return bInBlockLoop; }
+	bool GetInBlockLoop() const { return bInBlockLoop; }
+
+	bool GetInBowShotLoop() const { return bInBowShotLoop; }
 	
 protected:
 	virtual void BeginPlay() override;
@@ -76,10 +81,10 @@ protected:
 	UPROPERTY()
 	AItem* OverlappingItem = nullptr;
 	
-	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 	TObjectPtr<USpringArmComponent> SpringArmComponent;
 
-	UPROPERTY(EditDefaultsOnly, Category = "Camera")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Camera")
 	TObjectPtr<UCameraComponent> CameraComponent;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat")
@@ -96,6 +101,12 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bInBlockLoop = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bInBowShotLoop = false;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UMotionWarpingComponent* MotionWarpingComponent;
 	
 private:
 	virtual void InitAbilityActorInfo() override;

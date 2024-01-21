@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "RPGPlayerController.generated.h"
 
+class ARPGCharacter;
 class UCustomMovementComponent;
 struct FInventoryItem;
 class UWidgetComponent;
@@ -35,11 +36,19 @@ public:
 	UFUNCTION(Client, Reliable)
 	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter, bool bBlocked, bool bCriticalHit);
 
+	UInputMappingContext* GetRPGContext() const { return RPGContext; }
+	UInputMappingContext* GetClimbContext() const { return ClimbMappingContext; }
 
+	void AddInputMappingContext(UInputMappingContext* ContextToAdd, int32 InPriority);
+	void RemoveInputMappingContext(UInputMappingContext* ContextToRemove);
+		
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void SetupInputComponent() override;
+
+	void OnPlayEnterClimbState();
+	void OnPlayExitClimbState();
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
 	bool bIsCharacterAttacking = false;
@@ -81,12 +90,18 @@ protected:
 	TSubclassOf<UUserWidget> SpellPauseMenuClass;
 
 private:
-	
+
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputMappingContext> RPGContext;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputMappingContext> ClimbMappingContext;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> ClimbMoveAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> LookAction;
@@ -119,6 +134,9 @@ private:
 	TObjectPtr<UInputAction> ClimbAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
+	TObjectPtr<UInputAction> ClimbHopAction;
+
+	UPROPERTY(EditAnywhere, Category = "Input")
 	TObjectPtr<UInputAction> HeavyAttackAction;
 
 	UPROPERTY(EditAnywhere, Category = "Input")
@@ -145,8 +163,6 @@ private:
 	UFUNCTION(BlueprintCallable)
 	void Jump();
 	
-	void Move(const FInputActionValue& Value);
-	
 	void HandleGroundMovementInput(const FInputActionValue& Value);
 	void HandleClimbMovementInput(const FInputActionValue& Value);
 	
@@ -157,7 +173,11 @@ private:
 	void Run();
 	void Dodge();
 	void RunStop();
-	void ClimbActionStarted(const FInputActionValue& Value);
+	
+	void OnClimbActionStarted(const FInputActionValue& Value);
+
+	void OnClimbHopActionStarted(const FInputActionValue& Value);
+
 	void AbilityInputTagPressed(FGameplayTag InputTag);
 	void AbilityInputTagReleased(FGameplayTag InputTag);
 	void AbilityInputTagHeld(FGameplayTag InputTag);
@@ -172,6 +192,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
+
+	//UPROPERTY()
+	//UCustomMovementComponent* CustomMovementComponent;
 	
-	
+	UPROPERTY()
+	ARPGCharacter* RPGCharacter;
 };

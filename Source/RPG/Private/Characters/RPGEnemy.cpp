@@ -23,6 +23,8 @@ ARPGEnemy::ARPGEnemy()
 	bUseControllerRotationYaw = false;
 	bUseControllerRotationRoll = false;
 
+	BaseWalkSpeed = 250.f;
+
 	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	
 	AbilitySystemComponent = CreateDefaultSubobject<URPGAbilitySystemComponent>("AbilitySystemComponent");
@@ -58,18 +60,8 @@ int32 ARPGEnemy::GetPlayerLevel_Implementation()
 void ARPGEnemy::Die(const FVector& DeathImpulse)
 {
 	SetLifeSpan(LifeSpan);
-	if (CharacterType == ECharacterType::ECT_Boss)
-	{
-		// TODO:: Spawn an epic weapon, not the base
-		SpawnWeapon();
-		SpawnEffect();
-	}
-	else if (CharacterType == ECharacterType::ECT_RegularEnemy && FMath::RandRange(0, 100) < 20)
-	{
-		//TODO:: Spawn a random item, not a weapon
-		SpawnItem(); 
-		SpawnEffect();
-	}
+	SpawnItem(); 
+	SpawnEffect();
 	if (RPGAIController) RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("Dead"), true);
 	Super::Die(DeathImpulse);
 }
@@ -133,13 +125,23 @@ void ARPGEnemy::HitReactTagChanged(const FGameplayTag CallbackTag, int32 NewCoun
 	{
 		RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), bHitReacting);
 	}
-	
 }
+
+void ARPGEnemy::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	Super::StunTagChanged(CallbackTag, NewCount);
+	if (RPGAIController && RPGAIController->GetBlackboardComponent())
+	{
+		RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("Stunned"), bIsStunned);
+	}
+}
+
 
 void ARPGEnemy::InitAbilityActorInfo()
 {
 	AbilitySystemComponent->InitAbilityActorInfo(this, this);
 	Cast<URPGAbilitySystemComponent>(AbilitySystemComponent)->AbilityActorInfoSet();
+	AbilitySystemComponent->RegisterGameplayTagEvent(FRPGGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ARPGEnemy::StunTagChanged);
 
 	if (HasAuthority())
 	{
@@ -151,20 +153,6 @@ void ARPGEnemy::InitAbilityActorInfo()
 void ARPGEnemy::InitializeDefaultAttributes() const
 {
 	URPGAbilitySystemBlueprintLibrary::InitializeDefaultAttributes(this, CharacterClass, EnemyLevel, AbilitySystemComponent);
-}
-
-void ARPGEnemy::SpawnItem() const
-{
-	UWorld* World = GetWorld();
-	if (World && ItemClass)
-	{
-		const FVector SpawnLocation = GetActorLocation() + FVector(0.f, 0.f, 50.f);
-		ARPGEffectActor* SpawnedItem = World->SpawnActor<ARPGEffectActor>(ItemClass, SpawnLocation, FRotator::ZeroRotator);
-		if (SpawnedItem)
-		{
-			// TODO:: Set the weapon's epic type
-		}
-	}
 }
 
 void ARPGEnemy::SpawnWeapon() const

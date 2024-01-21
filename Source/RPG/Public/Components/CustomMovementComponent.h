@@ -6,8 +6,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "CustomMovementComponent.generated.h"
 
+DECLARE_DELEGATE(FOnEnterClimbState);
+DECLARE_DELEGATE(FOnExitClimbState);
+
 class UAnimMontage;
 class UAnimInstance;
+class ARPGCharacter;
 
 UENUM(BlueprintType)
 namespace ECustomMovementMode {
@@ -22,6 +26,10 @@ UCLASS()
 class RPG_API UCustomMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
+public:
+	FOnEnterClimbState OnEnterClimbStateDelegate;
+	FOnExitClimbState OnExitClimbStateDelegate;
+	
 protected:
 	
 #pragma region OverrideFunctions
@@ -52,7 +60,7 @@ private:
 #pragma region ClimbCore
 
 	bool TraceClimbableSurfaces();
-	FHitResult TraceFromEyeHeight(float TraceDistance, float TraceStartOffset = 0.0f);
+	FHitResult TraceFromEyeHeight(float TraceDistance, float TraceStartOffset = 0.0f, bool bShowDebugShape = false, bool DrawPersistentShapes = false);
 	bool CanStartClimbing();
 	void StartClimbing();
 	void StopClimbing();
@@ -62,12 +70,20 @@ private:
 	bool CheckHasReachedFloor();
 	bool CheckHasReachedLedge();
 	bool CheckCanClimbFromLedge();
+	void TryStartVaulting();
+	bool CanStartVaulting(FVector& OutVaultStartPosition, FVector& OutVaultLandPosition);
 	FQuat GetClimbRotation(float DeltaTime);
 	void SnapMovementToClimbableSurfaces(float DeltaTime);
 	void PlayClimbMontage(UAnimMontage* MontageToPlay);
 
 	UFUNCTION()
 	void OnClimbMontageEnded(UAnimMontage* Montage, bool bInterrupted);
+
+	void SetMotionWarpTarget(const FName& InWarpTargetName, const FVector& InTargetPosition);
+
+	void HandleHopUp();
+
+	bool CanHopUp(FVector& OutUpHopStartPosition);
 	
 #pragma endregion
 
@@ -79,7 +95,9 @@ private:
 
 	UPROPERTY()
 	UAnimInstance* OwningPlayerAnimInstance;
-	
+
+	UPROPERTY()
+	ARPGCharacter* OwningPlayerCharacter;
 #pragma endregion
 
 #pragma region ClimbBPVariables
@@ -120,10 +138,18 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
 	UAnimMontage* ClimbDownLedgeMontage;
 	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* VaultMontage;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Character Movement: Climbing", meta = (AllowPrivateAccess = "true"))
+	UAnimMontage* HopUpMontage;
+	
 #pragma endregion
 
 public:
 	void ToggleClimbing(bool bEnabledClimb);
+
+	void RequestHopping();
 
 	UFUNCTION(BlueprintCallable, Category = "Character Movement: Climbing")
 	bool IsClimbing() const;

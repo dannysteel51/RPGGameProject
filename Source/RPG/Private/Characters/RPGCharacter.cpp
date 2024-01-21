@@ -5,6 +5,7 @@
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystemComponent.h"
 #include "NiagaraComponent.h"
+#include "RPGGameplayTags.h"
 #include "AbilitySystem/RPGAbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/RPGAbilitySystemComponent.h"
 #include "AbilitySystem/Data/LevelUpInfo.h"
@@ -14,8 +15,10 @@
 #include "Player/RPGPlayerController.h"
 #include "Player/RPGPlayerState.h"
 #include "UI/HUD/RPGHUD.h"
+#include "MotionWarpingComponent.h"
+#include "Components/CustomMovementComponent.h"
+#include "RPG/DebugHelper.h"
 #include "Windows/WindowsApplication.h"
-#include "GameFramework/CharacterMovementComponent.h"
 
 
 ARPGCharacter::ARPGCharacter()
@@ -44,17 +47,22 @@ ARPGCharacter::ARPGCharacter()
 	bUseControllerRotationRoll = false;
 
 	CharacterClass = ECharacterClass::Elementalist;
+
+	MotionWarpingComponent = CreateDefaultSubobject<UMotionWarpingComponent>(TEXT("MotionWarpingComponent"));
+
 }
 
 void ARPGCharacter::Tick(float DeltaTime)
 {
-
+	Super::Tick(DeltaTime);
 }
 
 void ARPGCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+	
 }
+
 
 void ARPGCharacter::InitAbilityActorInfo()
 {
@@ -67,6 +75,7 @@ void ARPGCharacter::InitAbilityActorInfo()
 	AbilitySystemComponent = RPGPlayerState->GetAbilitySystemComponent();
 	AttributeSet = RPGPlayerState->GetAttributeSet();
 	OnAscRegistered.Broadcast(AbilitySystemComponent);
+	AbilitySystemComponent->RegisterGameplayTagEvent(FRPGGameplayTags::Get().Debuff_Stun, EGameplayTagEventType::NewOrRemoved).AddUObject(this, &ARPGCharacter::StunTagChanged);
 	
 	if (ARPGPlayerController* RPGPlayerController = Cast<ARPGPlayerController>(GetController()))
 	{

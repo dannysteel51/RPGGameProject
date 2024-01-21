@@ -95,15 +95,22 @@ FOnASCRegistered ABaseCharacter::GetOnASCRegisteredDelegate()
 	return OnAscRegistered;
 }
 
+/*
 FOnDeath ABaseCharacter::GetOnDeathDelegate()
 {
 	return OnDeath;
 }
+*/
 
 void ABaseCharacter::Die(const FVector& DeathImpulse)
 {
 	Weapon->DetachFromComponent(FDetachmentTransformRules(EDetachmentRule::KeepWorld, true));
 	MulticastHandleDeath(DeathImpulse);
+}
+
+FOnDeathSigniture& ABaseCharacter::GetOnDeathDelegate()
+{
+	return OnDeathDelegate;
 }
 
 void ABaseCharacter::MulticastHandleDeath_Implementation(const FVector& DeathImpulse)
@@ -138,7 +145,13 @@ void ABaseCharacter::MulticastHandleDeath_Implementation(const FVector& DeathImp
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		bDead = true;
 	}
-	
+	OnDeathDelegate.Broadcast(this);
+}
+
+void ABaseCharacter::StunTagChanged(const FGameplayTag CallbackTag, int32 NewCount)
+{
+	bIsStunned = NewCount > 0;
+	GetCharacterMovement()->MaxWalkSpeed = bIsStunned ? 0.f : BaseWalkSpeed;
 }
 
 void ABaseCharacter::BeginPlay()

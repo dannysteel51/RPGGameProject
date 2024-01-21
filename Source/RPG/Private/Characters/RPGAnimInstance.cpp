@@ -24,6 +24,7 @@ void URPGAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	GetClimbVelocity();
 	GetInShockLoop();
 	GetInBlockLoop();
+	GetInBowShotLoop();
 }
 
 void URPGAnimInstance::NativeInitializeAnimation()
@@ -94,5 +95,10 @@ void URPGAnimInstance::GetInShockLoop()
 void URPGAnimInstance::GetInBlockLoop()
 {
 	bInBlockLoop = Character->GetInBlockLoop();
+}
+
+void URPGAnimInstance::GetInBowShotLoop()
+{
+	bInBowShotLoop = Character->GetInBowShotLoop();
 }
 

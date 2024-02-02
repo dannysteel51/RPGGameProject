@@ -17,6 +17,10 @@ ABaseCharacter::ABaseCharacter()
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
 	BurnDebuffComponent->DebuffTag = FRPGGameplayTags::Get().Debuff_Burn;
 
+	StunDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("Stun Debuff Niagara Component");
+	StunDebuffComponent->SetupAttachment(GetRootComponent());
+	StunDebuffComponent->DebuffTag = FRPGGameplayTags::Get().Debuff_Stun;
+
 	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 	GetMesh()->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
@@ -90,9 +94,19 @@ ECharacterClass ABaseCharacter::GetCharacterClass_Implementation()
 	return CharacterClass;
 }
 
-FOnASCRegistered ABaseCharacter::GetOnASCRegisteredDelegate()
+FOnASCRegistered& ABaseCharacter::GetOnASCRegisteredDelegate()
 {
 	return OnAscRegistered;
+}
+
+void ABaseCharacter::SetIsBeingShocked_Implementation(bool bInLoop)
+{
+	bIsBeingShocked = bInLoop;
+}
+
+bool ABaseCharacter::IsBeingShocked_Implementation()
+{
+	return bIsBeingShocked;
 }
 
 /*
@@ -144,6 +158,8 @@ void ABaseCharacter::MulticastHandleDeath_Implementation(const FVector& DeathImp
         	
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		bDead = true;
+		BurnDebuffComponent->Deactivate();
+		StunDebuffComponent->Deactivate();
 	}
 	OnDeathDelegate.Broadcast(this);
 }

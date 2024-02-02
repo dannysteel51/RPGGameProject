@@ -73,4 +73,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
 	bool bInBowShotLoop;
 	void GetInBowShotLoop();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
+	bool bIsStunned;
+	void GetIsStunned();
 };
+

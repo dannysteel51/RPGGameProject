@@ -52,7 +52,9 @@ public:
 	virtual int32 GetMinionCount_Implementation() override;
 	virtual void AddToMinionCount_Implementation(int32 Amount) override;
 	virtual ECharacterClass GetCharacterClass_Implementation() override;
-	virtual FOnASCRegistered GetOnASCRegisteredDelegate() override;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate() override;
+	virtual void SetIsBeingShocked_Implementation(bool bInLoop) override;
+	virtual bool IsBeingShocked_Implementation() override;
 	//virtual FOnDeath GetOnDeathDelegate() override;
 	/* End Combat Interface */
 
@@ -71,6 +73,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly, Category = Combat)
 	bool bIsStunned = false;
+
+	UPROPERTY(BlueprintReadOnly, Category = Combat)
+	bool bIsBeingShocked = false;
 
 	
 protected:
@@ -141,6 +146,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<UDebuffNiagaraComponent> BurnDebuffComponent;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<UDebuffNiagaraComponent> StunDebuffComponent;
 
 private:
 	

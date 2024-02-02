@@ -37,6 +37,7 @@ ARPGEnemy::ARPGEnemy()
 	HealthBar->SetupAttachment(GetRootComponent());
 
 	InitialLifeSpan = 0.f;
+	
 }
 
 void ARPGEnemy::PossessedBy(AController* NewController)

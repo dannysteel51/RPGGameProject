@@ -98,7 +98,7 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	ARPGWeapon* GetEquippedWeapon();
 
-	virtual FOnASCRegistered GetOnASCRegisteredDelegate () = 0;
+	virtual FOnASCRegistered& GetOnASCRegisteredDelegate () = 0;
 	
 	//virtual FOnDeath GetOnDeathDelegate() = 0;
 
@@ -110,4 +110,11 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SetInBowShotLoop(bool bInLoop);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetIsBeingShocked(bool bInLoop);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	bool IsBeingShocked();
+	
 };

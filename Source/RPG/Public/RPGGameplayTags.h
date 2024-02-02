@@ -94,6 +94,12 @@ public:
 	FGameplayTag Abilities_Type_Passive;
 	FGameplayTag Abilities_Type_None;
 
+
+	// Passive Abilities
+	FGameplayTag Abilities_Passive_ProtectionRing;
+	FGameplayTag Abilities_Passive_HealthSiphon;
+	FGameplayTag Abilities_Passive_ManaSteal;
+	
 	FGameplayTag Abilities_Fire_FireBolt;
 	FGameplayTag Abilities_Lightning_Electrocute;
 	

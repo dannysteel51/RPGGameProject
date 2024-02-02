@@ -6,6 +6,8 @@
 #include "GameFramework/HUD.h"
 #include "RPGHUD.generated.h"
 
+class UAttributeSet;
+class UAbilitySystemComponent;
 class USpellMenuWidgetController;
 class UAttributeMenuWidgetController;
 struct FWidgetControllerParams;
@@ -54,5 +56,6 @@ private:
 	TSubclassOf<USpellMenuWidgetController> SpellMenuWidgetControllerClass;
 
 protected:
+	
 	
 };

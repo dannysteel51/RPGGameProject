@@ -238,6 +238,18 @@ void FRPGGameplayTags::InitializeNativeGameplayTags()
 	GameplayTags.Abilities_Lightning_Electrocute = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Abilities.Lightning.Electrocute"),FString("Electrocute Ability tag"));
 	
+
+	// Passive Abilities
+	GameplayTags.Abilities_Passive_ProtectionRing = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Passive.ProtectionRing"),FString("Protection Ring Passive Ability tag"));
+
+	GameplayTags.Abilities_Passive_HealthSiphon = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Passive.HealthSiphon"),FString("Health Siphon Passive Ability tag"));
+
+	GameplayTags.Abilities_Passive_ManaSteal = UGameplayTagsManager::Get().AddNativeGameplayTag(
+		FName("Abilities.Passive.ManaSteal"),FString("Mana Steal Passive Ability tag"));
+	
+	
 	//Cooldowns
 	GameplayTags.Cooldown_Fire_FireBolt = UGameplayTagsManager::Get().AddNativeGameplayTag(
 		FName("Cooldown.Fire.FireBolt"),FString("Cooldown FireBolt Ability tag"));

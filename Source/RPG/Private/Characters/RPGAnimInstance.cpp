@@ -25,6 +25,7 @@ void URPGAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	GetInShockLoop();
 	GetInBlockLoop();
 	GetInBowShotLoop();
+	GetIsStunned();
 }
 
 void URPGAnimInstance::NativeInitializeAnimation()
@@ -100,5 +101,10 @@ void URPGAnimInstance::GetInBlockLoop()
 void URPGAnimInstance::GetInBowShotLoop()
 {
 	bInBowShotLoop = Character->GetInBowShotLoop();
+}
+
+void URPGAnimInstance::GetIsStunned()
+{
+	bIsStunned = Character->bIsStunned;
 }
 

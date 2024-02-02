@@ -72,8 +72,8 @@ void URPGBeamSpell::StoreAdditionalTargets(TArray<AActor*>& OutAdditionalTargets
 	TArray<AActor*> OverlappingActors;
 	URPGAbilitySystemBlueprintLibrary::GetLivePlayersWithinRadius(GetAvatarActorFromActorInfo(), OverlappingActors, ActorsToIgnore, 850.f, BeamHitActor->GetActorLocation());
 
-	// int32 NumAdditionalTargets = FMath::Min(GetAbilityLevel() - 1, MaxNumShockTargets);
-	int32 NumAdditionalTargets = 5;
+	int32 NumAdditionalTargets = FMath::Min(GetAbilityLevel() - 1, MaxNumShockTargets);
+	//int32 NumAdditionalTargets = 5;
 	
 	URPGAbilitySystemBlueprintLibrary::GetClosestTargets(NumAdditionalTargets, OverlappingActors, OutAdditionalTargets, BeamHitActor->GetActorLocation());
 

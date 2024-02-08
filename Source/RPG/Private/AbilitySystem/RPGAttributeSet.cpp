@@ -225,10 +225,17 @@ void URPGAttributeSet::HandleIncomingExperience(const FEffectProperties& Props)
 			const int32 NumOfLevelUps = NewLevel - CurrentLevel;
 			if (NumOfLevelUps > 0)
 			{
-				const int32 AttributePointsReward = IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel);
-				const int32 SpellPoints = IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel);
-				
 				IPlayerInterface::Execute_AddToPlayerLevel(Props.SourceCharacter, NumOfLevelUps);
+
+				int32 AttributePointsReward = 0;
+				int32 SpellPoints = 0;
+
+				for (int32 i = 0; i < NumOfLevelUps; i++)
+				{
+					SpellPoints += IPlayerInterface::Execute_GetSpellPointsReward(Props.SourceCharacter, CurrentLevel + i);
+					AttributePointsReward += IPlayerInterface::Execute_GetAttributePointsReward(Props.SourceCharacter, CurrentLevel + i);
+				}
+				
 				IPlayerInterface::Execute_AddToAttributePoints(Props.SourceCharacter, AttributePointsReward);
 				IPlayerInterface::Execute_AddToSpellPoints(Props.SourceCharacter, SpellPoints);
 				

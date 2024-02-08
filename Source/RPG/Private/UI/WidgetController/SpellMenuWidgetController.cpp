@@ -128,7 +128,7 @@ void USpellMenuWidgetController::EquipButtonPressed()
 	const FGameplayTag SelectedStatus = GetRPGAbilitySystemComponent()->GetStatusFromAbilityTag(SelectedAbility.Ability);
 	if(SelectedStatus.MatchesTagExact(FRPGGameplayTags::Get().Abilities_Status_Equipped))
 	{
-		SelectedSlot = GetRPGAbilitySystemComponent()->GetInputTagFromAbilityTag(SelectedAbility.Ability);
+		SelectedSlot = GetRPGAbilitySystemComponent()->GetSlotFromAbilityTag(SelectedAbility.Ability);
 	}
 }
 

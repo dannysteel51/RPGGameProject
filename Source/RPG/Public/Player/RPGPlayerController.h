@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "RPGPlayerController.generated.h"
 
+class AMagicCircle;
 class ARPGCharacter;
 class UCustomMovementComponent;
 struct FInventoryItem;
@@ -31,7 +32,7 @@ public:
 	ARPGPlayerController();
 
 	UFUNCTION(Blueprintable)
-	FHitResult LineTraceForSpells(FHitResult &OutHitResult) const;
+	FHitResult LineTraceForSpells(FHitResult &OutHitResult);
 
 	UFUNCTION(Client, Reliable)
 	void ShowDamageNumber(float DamageAmount, ACharacter* TargetCharacter, bool bBlocked, bool bCriticalHit);
@@ -41,6 +42,14 @@ public:
 
 	void AddInputMappingContext(UInputMappingContext* ContextToAdd, int32 InPriority);
 	void RemoveInputMappingContext(UInputMappingContext* ContextToRemove);
+
+	UFUNCTION(BlueprintCallable)
+	void ShowMagicCircle(UMaterialInterface* DecalMaterial = nullptr);
+
+	UFUNCTION(BlueprintCallable)
+	void HideMagicCircle();
+
+	virtual void Tick(float DeltaSeconds) override;
 		
 protected:
 	virtual void BeginPlay() override;
@@ -189,6 +198,8 @@ private:
 	TObjectPtr<URPGAbilitySystemComponent> RPGAbilitySystemComponent;
 
 	URPGAbilitySystemComponent* GetASC();
+	
+	void LineTraceFromScreenCenter(FHitResult &HitResult, ECollisionChannel TraceChannel);
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UDamageTextComponent> DamageTextComponentClass;
@@ -198,4 +209,14 @@ private:
 	
 	UPROPERTY()
 	ARPGCharacter* RPGCharacter;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AMagicCircle> MagicCircleClass;
+
+	UPROPERTY()
+	TObjectPtr<AMagicCircle> MagicCircle;
+	
+	void UpdateMagicCircleLocation();
+
+	FHitResult LineTraceResult;
 };

@@ -221,5 +221,21 @@ void ARPGCharacter::AddToPlayerLevel_Implementation(int32 InPlayerLevel)
 	}
 }
 
+void ARPGCharacter::ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial)
+{
+	if (ARPGPlayerController* RPGPlayerController = Cast<ARPGPlayerController>(GetController()))
+	{
+		RPGPlayerController->ShowMagicCircle(DecalMaterial);
+	}
+}
+
+void ARPGCharacter::HideMagicCircle_Implementation()
+{
+	if (ARPGPlayerController* RPGPlayerController = Cast<ARPGPlayerController>(GetController()))
+	{
+		RPGPlayerController->HideMagicCircle();
+	}
+}
+
 
 

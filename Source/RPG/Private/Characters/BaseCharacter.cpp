@@ -4,6 +4,7 @@
 #include "RPGGameplayTags.h"
 #include "AbilitySystem/RPGAbilitySystemComponent.h"
 #include "AbilitySystem/Debuff/DebuffNiagaraComponent.h"
+#include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/CustomMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -11,7 +12,7 @@
 
 ABaseCharacter::ABaseCharacter()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	BurnDebuffComponent = CreateDefaultSubobject<UDebuffNiagaraComponent>("Burn Debuff Niagara Component");
 	BurnDebuffComponent->SetupAttachment(GetRootComponent());
@@ -30,11 +31,26 @@ ABaseCharacter::ABaseCharacter()
 	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>("Weapon");
 	Weapon->SetupAttachment(GetMesh(), "StartupWeaponSocket");
 	Weapon->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+
+	EffectAttachComponent = CreateDefaultSubobject<USceneComponent>("EffectAttachPoint");
+	EffectAttachComponent->SetupAttachment(GetRootComponent());
+	ProtectionRingNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("Protection Ring Niagara Component");
+	ProtectionRingNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	HealthSiphonNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("Health Siphon Niagara Component");
+	HealthSiphonNiagaraComponent->SetupAttachment(EffectAttachComponent);
+	ManaStealNiagaraComponent = CreateDefaultSubobject<UPassiveNiagaraComponent>("Mana Steal Niagara Component");
+	ManaStealNiagaraComponent->SetupAttachment(EffectAttachComponent);
 }
 
 UAbilitySystemComponent* ABaseCharacter::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
+}
+
+void ABaseCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+	EffectAttachComponent->SetWorldRotation(FRotator::ZeroRotator);
 }
 
 AActor* ABaseCharacter::GetAvatar_Implementation() 

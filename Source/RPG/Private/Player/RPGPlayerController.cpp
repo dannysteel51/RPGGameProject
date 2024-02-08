@@ -6,6 +6,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "RPGGameplayTags.h"
 #include "AbilitySystem/RPGAbilitySystemComponent.h"
+#include "Actor/MagicCircle.h"
 #include "Camera/CameraComponent.h"
 #include "Characters/RPGCharacter.h"
 #include "Components/CustomMovementComponent.h"
@@ -19,6 +20,8 @@
 
 ARPGPlayerController::ARPGPlayerController()
 {
+	PrimaryActorTick.bCanEverTick = true;
+	
 	bReplicates = true;
 	bMenuVisible = false;
 	bTabDown = false;
@@ -116,6 +119,33 @@ void ARPGPlayerController::RemoveInputMappingContext(UInputMappingContext* Conte
 	{
 		Subsystem->RemoveMappingContext(ContextToRemove);
 	}
+}
+
+void ARPGPlayerController::ShowMagicCircle(UMaterialInterface* DecalMaterial)
+{
+	if(!IsValid(MagicCircle))
+	{
+		MagicCircle = GetWorld()->SpawnActor<AMagicCircle>(MagicCircleClass);
+		if (DecalMaterial)
+		{
+			MagicCircle->MagicCircleDecal->SetMaterial(0, DecalMaterial);
+		}
+	}
+}
+
+void ARPGPlayerController::HideMagicCircle()
+{
+	if (IsValid(MagicCircle))
+	{
+		MagicCircle->Destroy();
+	}
+}
+
+void ARPGPlayerController::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	UpdateMagicCircleLocation();
 }
 
 void ARPGPlayerController::HandleGroundMovementInput(const FInputActionValue& Value)
@@ -241,25 +271,9 @@ void ARPGPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
 }
 
-FHitResult ARPGPlayerController::LineTraceForSpells(FHitResult &OutHitResult) const 
+FHitResult ARPGPlayerController::LineTraceForSpells(FHitResult &OutHitResult) 
 {
-	FVector2d ViewportSize;
-	if (GEngine && GEngine->GameViewport)
-	{
-		GEngine->GameViewport->GetViewportSize(ViewportSize);
-	}
-	FVector2D CenterScreen(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
-	//CenterScreen.Y -= 50.f;
-	FVector CameraLocation;
-	FVector CameraDirection;
-            			
-	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(this, CenterScreen, CameraLocation, CameraDirection);
-	if (bScreenToWorld)
-	{
-		const FVector Start = CameraLocation;
-		const FVector End = Start + CameraDirection * 50'000.f;
-		GetWorld()->LineTraceSingleByChannel(OutHitResult, Start, End, ECC_Target);
-	}
+	LineTraceFromScreenCenter(OutHitResult, ECC_Target);
 	return OutHitResult;
 }
 
@@ -282,6 +296,36 @@ URPGAbilitySystemComponent* ARPGPlayerController::GetASC()
 		RPGAbilitySystemComponent = Cast<URPGAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetPawn<APawn>()));
 	}
 	return RPGAbilitySystemComponent;
+}
+
+void ARPGPlayerController::LineTraceFromScreenCenter(FHitResult &HitResult, ECollisionChannel TraceChannel)
+{
+	FVector2d ViewportSize;
+	if (GEngine && GEngine->GameViewport)
+	{
+		GEngine->GameViewport->GetViewportSize(ViewportSize);
+	}
+	FVector2D CenterScreen(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	//CenterScreen.Y -= 50.f;
+	FVector CameraLocation;
+	FVector CameraDirection;
+            			
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(this, CenterScreen, CameraLocation, CameraDirection);
+	if (bScreenToWorld)
+	{
+		const FVector Start = CameraLocation;
+		const FVector End = Start + CameraDirection * 50'000.f;
+		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, TraceChannel);
+	}
+}
+
+void ARPGPlayerController::UpdateMagicCircleLocation()
+{
+	if (IsValid(MagicCircle))
+	{
+		LineTraceFromScreenCenter(LineTraceResult,ECC_Visibility);
+		MagicCircle->SetActorLocation(LineTraceResult.ImpactPoint);
+	}
 }
 
 void ARPGPlayerController::PauseGame_Implementation()

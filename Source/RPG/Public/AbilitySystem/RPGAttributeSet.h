@@ -238,7 +238,10 @@ public:
 private:
 
 	void HandleIncomingDamage(const FEffectProperties& Props);
+	
+	
 	void HandleIncomingExperience(const FEffectProperties& Props);
+	
 	void Debuff(const FEffectProperties& Props);
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 	void ShowFloatingText(float DamageAmount, const FEffectProperties& Props, bool bBlockedHit, bool bCriticalHit) const;

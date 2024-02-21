@@ -9,6 +9,7 @@
 #include "AbilitySystem/RPGAttributeSet.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "Interfaces/CombatInterface.h"
+#include "Kismet/GameplayStatics.h"
 
 struct RPGDamageStatics
 {
@@ -138,6 +139,7 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 	}
 
 	const FGameplayEffectSpec& Spec = ExecutionParams.GetOwningSpec();
+	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 
 	const FGameplayTagContainer* SourceTags = Spec.CapturedSourceTags.GetAggregatedTags();
 	const FGameplayTagContainer* TargetTags = Spec.CapturedTargetTags.GetAggregatedTags();
@@ -165,12 +167,40 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 		const FGameplayEffectAttributeCaptureDefinition CaptureDef = ResistanceTagsToCaptureDefs[ResistanceTag]; // Returns the CaptureDef for the ResistanceTag in the ResistanceTagsToCaptureDefs map
 
 		float DamageTypeValue = Spec.GetSetByCallerMagnitude(DamageTypeTag, false);
+		if (DamageTypeValue <= 0.f)
+		{
+			continue;
+		}
 		
 		float Resistance = 0.f;
 		ExecutionParams.AttemptCalculateCapturedAttributeMagnitude(CaptureDef, EvaluationParameters, Resistance);
 		Resistance = FMath::Clamp(Resistance, 0.f, 100.f);
 
 		DamageTypeValue *= (100.f - Resistance) / 100.f; // Resistance reduces damage by a percentage
+
+		if (URPGAbilitySystemBlueprintLibrary::IsRadialDamage(EffectContextHandle))
+		{
+			ICombatInterface* TargetCombatInterface = Cast<ICombatInterface>(TargetAvatar);
+			if (TargetCombatInterface)
+			{
+				TargetCombatInterface->GetOnDamageSignature().AddLambda([&](float DamageAmount)
+				{
+					DamageTypeValue = DamageAmount;
+				});
+			}
+			UGameplayStatics::ApplyRadialDamageWithFalloff(TargetAvatar,
+				DamageTypeValue,
+				0.f,
+				URPGAbilitySystemBlueprintLibrary::GetRadialDamageOrigin(EffectContextHandle),
+				URPGAbilitySystemBlueprintLibrary::GetRadialDamageInnerRadius(EffectContextHandle),
+				URPGAbilitySystemBlueprintLibrary::GetRadialDamageOuterRadius(EffectContextHandle),
+				1.f,
+				UDamageType::StaticClass(),
+				TArray<AActor*>(),
+				SourceAvatar,
+				nullptr);
+		}
+		
 		Damage += DamageTypeValue;
 	}
 
@@ -186,7 +216,6 @@ void UExecCalc_Damage::Execute_Implementation(const FGameplayEffectCustomExecuti
 
 	const bool bBlocked = FMath::RandRange(0.f, 100.f) < BlockChance;
 	Damage = bBlocked ? Damage / 2.f : Damage; // If blocked, reduce damage by half
-	FGameplayEffectContextHandle EffectContextHandle = Spec.GetContext();
 	URPGAbilitySystemBlueprintLibrary::SetIsBlockedHit(EffectContextHandle, bBlocked);
 
 	/*

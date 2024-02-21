@@ -46,21 +46,33 @@ public:
 	/*
 	 * PlayerInterface
 	 */
+	UFUNCTION(BlueprintCallable)
 	virtual void AddToXP_Implementation(int32 InXP) override;
+	UFUNCTION(BlueprintCallable)
 	virtual int32 GetXP_Implementation() const override;
+	UFUNCTION(BlueprintCallable)
 	virtual void LevelUp_Implementation() override;
+	UFUNCTION(BlueprintCallable)
 	virtual int32 FindLevelForXP_Implementation(int32 InXP) const override;
+	UFUNCTION(BlueprintCallable)
 	virtual int32 GetAttributePointsReward_Implementation(int32 Level) const override;
 	virtual int32 GetAttributePoints_Implementation() const override;
+	UFUNCTION(BlueprintCallable)
 	virtual int32 GetSpellPointsReward_Implementation(int32 Level) const override;
+	UFUNCTION(BlueprintCallable)
 	virtual void AddToAttributePoints_Implementation(int32 InAttributePoints) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void AddToSpellPoints_Implementation(int32 InSpellPoints) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void AddToPlayerLevel_Implementation(int32 InPlayerLevel) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void ShowMagicCircle_Implementation(UMaterialInterface* DecalMaterial) override;
+	UFUNCTION(BlueprintCallable)
 	virtual void HideMagicCircle_Implementation() override;
 	/*
 	 * End PlayerInterface
 	 */
+	
 	UMotionWarpingComponent* GetMotionWarpingComponent() const { return MotionWarpingComponent; }
 	
 	UCameraComponent* GetCameraComponent() const { return CameraComponent; }

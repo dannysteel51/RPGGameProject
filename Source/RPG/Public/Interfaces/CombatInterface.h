@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "AbilitySystem/Data/CharacterClassInfo.h"
+//#include "Characters/BaseCharacter.h"
 #include "UObject/Interface.h"
 #include "CombatInterface.generated.h"
 
@@ -17,6 +18,7 @@ struct FGameplayTag;
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeath, AActor*, DeadActor);
 DECLARE_MULTICAST_DELEGATE_OneParam(FOnASCRegistered, UAbilitySystemComponent*);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnDeathSigniture, AActor*, DeadActor);
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnDamageSigniture, float /** DamageAmount */);
 
 USTRUCT(BlueprintType)
 struct FTaggedMontage
@@ -99,6 +101,9 @@ public:
 	ARPGWeapon* GetEquippedWeapon();
 
 	virtual FOnASCRegistered& GetOnASCRegisteredDelegate () = 0;
+
+	//virtual FOnDamageSigniture& GetOnDamageSignature() = 0;
+	virtual FOnDamageSigniture& GetOnDamageSignature() = 0;
 	
 	//virtual FOnDeath GetOnDeathDelegate() = 0;
 

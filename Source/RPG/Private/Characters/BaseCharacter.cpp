@@ -53,6 +53,14 @@ void ABaseCharacter::Tick(float DeltaSeconds)
 	EffectAttachComponent->SetWorldRotation(FRotator::ZeroRotator);
 }
 
+float ABaseCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator,
+	AActor* DamageCauser)
+{
+	const float DamageTaken = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+	OnDamageDelegate.Broadcast(DamageTaken);
+	return DamageTaken;
+}
+
 AActor* ABaseCharacter::GetAvatar_Implementation() 
 {
 	return this;
@@ -123,6 +131,11 @@ void ABaseCharacter::SetIsBeingShocked_Implementation(bool bInLoop)
 bool ABaseCharacter::IsBeingShocked_Implementation()
 {
 	return bIsBeingShocked;
+}
+
+FOnDamageSigniture& ABaseCharacter::GetOnDamageSignature()
+{
+	return OnDamageDelegate;
 }
 
 /*

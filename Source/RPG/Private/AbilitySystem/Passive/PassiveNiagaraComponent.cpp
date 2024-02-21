@@ -2,7 +2,6 @@
 
 
 #include "AbilitySystem/Passive/PassiveNiagaraComponent.h"
-
 #include "AbilitySystemBlueprintLibrary.h"
 #include "AbilitySystem/RPGAbilitySystemComponent.h"
 #include "Interfaces/CombatInterface.h"
@@ -25,9 +24,9 @@ void UPassiveNiagaraComponent::BeginPlay()
 	{
 		CombatInterface->GetOnASCRegisteredDelegate().AddLambda([this](UAbilitySystemComponent* ASC)
 		{
-			if (URPGAbilitySystemComponent* ASC = Cast<URPGAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner())))
+			if (URPGAbilitySystemComponent* AbilitySystemComp = Cast<URPGAbilitySystemComponent>(UAbilitySystemBlueprintLibrary::GetAbilitySystemComponent(GetOwner())))
 			{
-				ASC->ActivatePassiveEffect.AddUObject(this, &UPassiveNiagaraComponent::OnPassiveActivate);
+				AbilitySystemComp->ActivatePassiveEffect.AddUObject(this, &UPassiveNiagaraComponent::OnPassiveActivate);
 			}
 		});
 	}

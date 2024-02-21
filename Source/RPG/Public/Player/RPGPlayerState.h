@@ -35,13 +35,19 @@ public:
 	FOnPlayerStatChangedSigniture OnLevelChangedDelegate;
 	FOnPlayerStatChangedSigniture OnAttributePointsChangedDelegate;
 	FOnPlayerStatChangedSigniture OnSpellPointsChangedDelegate;
-	
+
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetPlayerLevel() const {return Level; }
+
+	UFUNCTION(BlueprintCallable)
 	FORCEINLINE int32 GetXP() const {return XP; }
+	
 	FORCEINLINE int32 GetAttributePoints() const {return AttributePoints; }
 	FORCEINLINE int32 GetSpellPoints() const {return SpellPoints; }
 
+	UFUNCTION(BlueprintCallable)
 	void AddToXP(int32 InXP);
+	
 	void AddToLevel(int32 InLevel);
 	void AddToAttributePoints(int32 InAttributePoints);
 	void AddToSpellPoints(int32 InSpellPoints);

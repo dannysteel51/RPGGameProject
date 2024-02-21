@@ -271,12 +271,6 @@ void ARPGPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 	if (GetASC()) GetASC()->AbilityInputTagHeld(InputTag);
 }
 
-FHitResult ARPGPlayerController::LineTraceForSpells(FHitResult &OutHitResult) 
-{
-	LineTraceFromScreenCenter(OutHitResult, ECC_Target);
-	return OutHitResult;
-}
-
 void ARPGPlayerController::ShowDamageNumber_Implementation(float DamageAmount, ACharacter* TargetCharacter, bool bBlocked, bool bCriticalHit)
 {
 	if (IsValid(TargetCharacter) && DamageTextComponentClass)
@@ -305,13 +299,13 @@ void ARPGPlayerController::LineTraceFromScreenCenter(FHitResult &HitResult, ECol
 	{
 		GEngine->GameViewport->GetViewportSize(ViewportSize);
 	}
-	FVector2D CenterScreen(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
+	const FVector2D CenterScreen(ViewportSize.X / 2.f, ViewportSize.Y / 2.f);
 	//CenterScreen.Y -= 50.f;
 	FVector CameraLocation;
 	FVector CameraDirection;
             			
-	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(this, CenterScreen, CameraLocation, CameraDirection);
-	if (bScreenToWorld)
+	
+	if (bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(this, CenterScreen, CameraLocation, CameraDirection))
 	{
 		const FVector Start = CameraLocation;
 		const FVector End = Start + CameraDirection * 50'000.f;
@@ -319,11 +313,17 @@ void ARPGPlayerController::LineTraceFromScreenCenter(FHitResult &HitResult, ECol
 	}
 }
 
+FHitResult ARPGPlayerController::LineTraceForSpells(FHitResult &OutHitResult) 
+{
+	LineTraceFromScreenCenter(OutHitResult, ECC_Target);
+	return OutHitResult;
+}
+
 void ARPGPlayerController::UpdateMagicCircleLocation()
 {
 	if (IsValid(MagicCircle))
 	{
-		LineTraceFromScreenCenter(LineTraceResult,ECC_Visibility);
+		LineTraceFromScreenCenter(LineTraceResult, ECC_Visibility);
 		MagicCircle->SetActorLocation(LineTraceResult.ImpactPoint);
 	}
 }

@@ -25,6 +25,7 @@ public:
 	ARPGPlayerState();
 	
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	UFUNCTION(BlueprintCallable)
 	UAttributeSet* GetAttributeSet() const {return AttributeSet; }
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 

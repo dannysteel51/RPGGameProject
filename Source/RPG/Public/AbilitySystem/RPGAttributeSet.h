@@ -7,6 +7,8 @@
 #include "AbilitySystemComponent.h"
 #include "RPGAttributeSet.generated.h"
 
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnXPFromKill, int32 /*State value */);
+
 #define ATTRIBUTE_ACCESSORS(ClassName, PropertyName) \
 	GAMEPLAYATTRIBUTE_PROPERTY_GETTER(ClassName, PropertyName) \
 	GAMEPLAYATTRIBUTE_VALUE_GETTER(PropertyName) \
@@ -64,6 +66,8 @@ class RPG_API URPGAttributeSet : public UAttributeSet
 
 public:
 	URPGAttributeSet();
+	
+	FOnXPFromKill OnXPFromKillDelegate;
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void PreAttributeChange(const FGameplayAttribute& Attribute, float& NewValue) override;
@@ -235,19 +239,23 @@ public:
 	UFUNCTION()
 	void OnRep_PhysicalResistance(const FGameplayAttributeData& OldPhysicalResistance) const;
 
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	int32 GetXPFromKill(int32 XP);
+
 private:
 
 	void HandleIncomingDamage(const FEffectProperties& Props);
 	
-	
 	void HandleIncomingExperience(const FEffectProperties& Props);
-	
 	void Debuff(const FEffectProperties& Props);
 	void SetEffectProperties(const FGameplayEffectModCallbackData& Data, FEffectProperties& Props) const;
 	void ShowFloatingText(float DamageAmount, const FEffectProperties& Props, bool bBlockedHit, bool bCriticalHit) const;
 	void SendXPEvent(const FEffectProperties& Props) const;
 	bool bTopOffHealth = false;
 	bool bTopOffMana = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(AllowPrivateAccess = "true"))
+	int32 OutgoingDamage = 0;
 	
 };
 

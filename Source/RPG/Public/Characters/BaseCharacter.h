@@ -37,6 +37,8 @@ class RPG_API ABaseCharacter : public ACharacter, public IAbilitySystemInterface
 public:
 	ABaseCharacter();
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
+	UFUNCTION(BlueprintCallable)
 	UAttributeSet* GetAttributeSet() const {return AttributeSet; }
 	virtual void Tick(float DeltaSeconds) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

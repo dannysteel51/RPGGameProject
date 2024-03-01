@@ -213,6 +213,8 @@ void URPGAttributeSet::HandleIncomingExperience(const FEffectProperties& Props)
 		const float LocalIncomingExperience = GetIncomingExperience();
 		SetIncomingExperience(0.f);
 
+		GetXPFromKill(LocalIncomingExperience);
+
 		// TODO:: See if we should level up
 
 		// Source Character is the owner, since GA_ListenForEvents applies GE_EventBasedEffect, adding to Incoming XP
@@ -422,4 +424,10 @@ void URPGAttributeSet::OnRep_PhysicalResistance(const FGameplayAttributeData& Ol
 {
 	GAMEPLAYATTRIBUTE_REPNOTIFY(URPGAttributeSet, PhysicalResistance, OldPhysicalResistance);
 }
+
+int32 URPGAttributeSet::GetXPFromKill_Implementation(int32 XP)
+{
+	return OutgoingDamage = XP;
+}
+
 

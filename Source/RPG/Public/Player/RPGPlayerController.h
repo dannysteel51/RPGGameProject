@@ -49,6 +49,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HideMagicCircle();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bTabDown = false;
+
 	virtual void Tick(float DeltaSeconds) override;
 		
 protected:
@@ -155,8 +158,12 @@ private:
 	TObjectPtr<UInputAction> TargetLockAction;
 
 	// For the Pause Menu
-	UPROPERTY(BlueprintReadOnly, Meta = (AllowPrivateAccess = true))
-	bool bTabDown = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	bool bReadingBook = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
+	bool bPauseReadingBook = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", Meta = (AllowPrivateAccess = true))
 	bool bIsTargeting = false;

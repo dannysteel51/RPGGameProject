@@ -50,7 +50,6 @@ void ARPGEnemy::PossessedBy(AController* NewController)
 	RPGAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
 	RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
 	RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), CharacterClass != ECharacterClass::Warrior);
-	
 }
 
 int32 ARPGEnemy::GetPlayerLevel_Implementation()

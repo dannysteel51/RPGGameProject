@@ -150,7 +150,7 @@ void ARPGPlayerController::Tick(float DeltaSeconds)
 
 void ARPGPlayerController::HandleGroundMovementInput(const FInputActionValue& Value)
 {
-	if(bTabDown) return;
+	if(bTabDown || bPauseReadingBook) return;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputPressed))
 	{
 		return;
@@ -196,7 +196,7 @@ void ARPGPlayerController::HandleClimbMovementInput(const FInputActionValue& Val
 
 void ARPGPlayerController::Look(const FInputActionValue& Value)
 {
-		if (bTabDown) return;
+		if (bTabDown || bReadingBook) return;
 		if(bIsTargeting)
 		{
 			const FVector2D LookAxisVector = Value.Get<FVector2D>();
@@ -213,7 +213,7 @@ void ARPGPlayerController::Look(const FInputActionValue& Value)
 
 void ARPGPlayerController::Jump()
 {
-	if (bTabDown || bIsCharacterAttacking) return;
+	if (bTabDown || bIsCharacterAttacking || bReadingBook) return;
 	GetCharacter()->Jump();
 }
 
@@ -303,9 +303,9 @@ void ARPGPlayerController::LineTraceFromScreenCenter(FHitResult &HitResult, ECol
 	//CenterScreen.Y -= 50.f;
 	FVector CameraLocation;
 	FVector CameraDirection;
-            			
-	
-	if (bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(this, CenterScreen, CameraLocation, CameraDirection))
+
+	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(this, CenterScreen, CameraLocation, CameraDirection);
+	if (bScreenToWorld)
 	{
 		const FVector Start = CameraLocation;
 		const FVector End = Start + CameraDirection * 50'000.f;

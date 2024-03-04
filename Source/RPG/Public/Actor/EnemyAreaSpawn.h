@@ -21,23 +21,28 @@ public:
 	bool bAlreadyOverlapped = false;
 	bool bAlreadyShowedMessage = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "EnemySpawn")
+	UPROPERTY(BlueprintReadOnly, Category = "EnemySpawn")
 	bool bCreateWidget = false;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "EnemySpawn")
 	int32 EnemyCount = 0;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemySpawn")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "EnemySpawn")
 	TSubclassOf<ARPGEnemy> SpawnedEnemyClass;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemySpawn")
-	USceneComponent* SpawnPoints;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "EnemySpawn")
+	TObjectPtr<USceneComponent> SceneSpawnPoints;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemySpawn")
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "EnemySpawn")
 	TArray<USceneComponent*> SpawnPointArray;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemySpawn")
-	int32 InitialSpawnPoints = 1;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "EnemySpawn", meta = (AllowPrivateAccess = "true"))
+	TArray<FVector> SpawnedEnemyLocations;
+
+	TArray<FVector> EnemySpawnLocations;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "EnemySpawn")
+	int32 InitialSpawnPoints = 2;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemySpawn")
 	UBoxComponent* BoxComponent;
@@ -59,17 +64,16 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	ARPGPlayerController* PlayerController;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemySpawn", meta = (AllowPrivateAccess = "true"))
-	TArray <FVector> SpawnedEnemyLocations;
+	
 
 public:	
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void OnBoxComponentOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void OnEnemyDestroyed(AActor* DestroyedActor);
+	void EnemyDestroyed(AActor* DestroyedActor);
 	
 	void ShowAfterBattleMessage();
 };

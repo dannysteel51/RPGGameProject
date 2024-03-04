@@ -15,13 +15,16 @@ class RPG_API ARPGInventoryGameState : public AGameStateBase
 {
 	GENERATED_BODY()
 public:
+	/*
 	ARPGInventoryGameState();
 
+	
 	UDataTable* GetItemDB() const;
-
+	
 protected:
+
 	
 	UPROPERTY(EditDefaultsOnly)
 	UDataTable* ItemDB;
-	
+	*/
 };

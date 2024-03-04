@@ -15,13 +15,10 @@ AEnemyAreaSpawn::AEnemyAreaSpawn()
 
 	BoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComponent"));
 	RootComponent = BoxComponent;
+	
+	SceneSpawnPoints = CreateDefaultSubobject<USceneComponent>(FName("SpawnPoint"));
+	SceneSpawnPoints->SetupAttachment(RootComponent);
 
-	for (int i = 0; i < InitialSpawnPoints; i++)
-	{
-		SpawnPoints = CreateDefaultSubobject<USceneComponent>(TEXT("SpawnPoint" + i));
-		SpawnPoints->SetupAttachment(BoxComponent);
-		SpawnPointArray.Add(SpawnPoints);
-	}
 }
 
 void AEnemyAreaSpawn::BeginPlay()
@@ -30,13 +27,8 @@ void AEnemyAreaSpawn::BeginPlay()
 
 	PlayerCharacter = Cast<ARPGCharacter>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	PlayerController = Cast<ARPGPlayerController>(GetWorld()->GetFirstPlayerController());
-
-	for (int i = 0; i < SpawnPointArray.Num(); i++)
-	{
-		SpawnedEnemyLocations.Add(SpawnPointArray[i]->GetComponentLocation());
-	}
-	FVector Position = SpawnedEnemyLocations[0];
-	//printf(Position.ToString().c_str());
+	
+	SpawnedEnemyLocations.Add(SceneSpawnPoints->GetComponentLocation());
 	BoxComponent->OnComponentBeginOverlap.AddDynamic(this, &AEnemyAreaSpawn::OnBoxComponentOverlapBegin);
 }
 
@@ -72,28 +64,25 @@ void AEnemyAreaSpawn::OnBoxComponentOverlapBegin(UPrimitiveComponent* Overlapped
 				// Spawn enemy
 				UWorld* World = GetWorld();
 				AActor* EnemyInstigator = World->SpawnActor(SpawnedEnemyClass, &SpawnedEnemyLocations[i]);
-				EnemyInstigator->OnDestroyed.AddDynamic(this, &AEnemyAreaSpawn::OnEnemyDestroyed);
+				
+				if (APawn* EnemyPawn = Cast<APawn>(EnemyInstigator))
+				{
+					EnemyPawn->SpawnDefaultController();
+				}
+				
+				EnemyInstigator->OnDestroyed.AddDynamic(this, &AEnemyAreaSpawn::EnemyDestroyed);
 			}
 		}
 	}
 }
 
-void AEnemyAreaSpawn::OnEnemyDestroyed(AActor* DestroyedActor)
+void AEnemyAreaSpawn::EnemyDestroyed(AActor* DestroyedActor)
 {
-	//DestroyedActor->OnDestroyed.RemoveDynamic(this, &AEnemyAreaSpawn::OnEnemyDestroyed);
 	EnemyCount--;
 }
 
 void AEnemyAreaSpawn::ShowAfterBattleMessage()
 {
-	ARPGPlayerController* PC = Cast<ARPGPlayerController>(PlayerController);
 	bCreateWidget = true;
-	/*
-	if (AfterBattleMessageClass)
-	{
-		AfterBattleMessage = CreateWidget<UUserWidget>(GetWorld(), AfterBattleMessageClass, );
-		AfterBattleMessage->AddToViewport();
-	}
-	*/
 }
 

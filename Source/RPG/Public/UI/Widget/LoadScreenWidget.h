@@ -13,5 +13,9 @@ UCLASS()
 class RPG_API ULoadScreenWidget : public UUserWidget
 {
 	GENERATED_BODY()
-	
+
+public:
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void BlueprintInitializeWidget();
 };

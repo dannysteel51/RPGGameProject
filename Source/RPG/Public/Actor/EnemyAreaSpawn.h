@@ -24,10 +24,16 @@ public:
 	UPROPERTY(BlueprintReadOnly, Category = "EnemySpawn")
 	bool bCreateWidget = false;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "EnemySpawn")
+	bool bShouldSpawnEnemy = true;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "EnemySpawn")
+	bool bShouldAutoSpawn = false;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "EnemySpawn")
 	int32 EnemyCount = 0;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "EnemySpawn")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "EnemySpawn")
 	TSubclassOf<ARPGEnemy> SpawnedEnemyClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "EnemySpawn")

@@ -77,5 +77,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
 	bool bIsStunned;
 	void GetIsStunned();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
+	bool IsInteractingWithBox;
+	void GetIsInteractingWithBox();
 };
 

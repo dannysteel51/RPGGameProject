@@ -35,6 +35,12 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInWater = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bCanInteractWithBox = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsInteractingWithBox = false;
+
 	/*
 	 * CombatInterface
 	 */

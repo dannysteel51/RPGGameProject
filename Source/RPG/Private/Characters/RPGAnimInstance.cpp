@@ -26,6 +26,7 @@ void URPGAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	GetInBlockLoop();
 	GetInBowShotLoop();
 	GetIsStunned();
+	GetIsInteractingWithBox();
 }
 
 void URPGAnimInstance::NativeInitializeAnimation()
@@ -106,5 +107,10 @@ void URPGAnimInstance::GetInBowShotLoop()
 void URPGAnimInstance::GetIsStunned()
 {
 	bIsStunned = Character->bIsStunned;
+}
+
+void URPGAnimInstance::GetIsInteractingWithBox()
+{
+	IsInteractingWithBox = Character->bIsInteractingWithBox;
 }
 

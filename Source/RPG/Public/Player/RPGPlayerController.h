@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "GameplayTagContainer.h"
+#include "InputActionValue.h"
 #include "RPGPlayerController.generated.h"
 
 class AMagicCircle;
@@ -51,8 +52,17 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bTabDown = false;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsGliding = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FVector2D MovementVector = FVector2D(0.0f, 0.0f);
 
 	virtual void Tick(float DeltaSeconds) override;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	float LineTraceCameraStart = 1000.0f;
 		
 protected:
 	virtual void BeginPlay() override;
@@ -163,7 +173,7 @@ private:
 	bool bReadingBook = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Meta = (AllowPrivateAccess = true))
-	bool bPauseReadingBook = false;
+	bool bPauseToReadMessage = false;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Input", Meta = (AllowPrivateAccess = true))
 	bool bIsTargeting = false;

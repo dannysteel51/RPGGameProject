@@ -68,6 +68,7 @@ protected:
 	
 	UFUNCTION(BlueprintImplementableEvent, BlueprintCallable)
 	void SpawnItem();
+	
 	void SpawnWeapon() const;
 	
 	void SpawnEffect() const;

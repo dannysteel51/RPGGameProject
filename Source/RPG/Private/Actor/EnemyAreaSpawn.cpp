@@ -63,14 +63,16 @@ void AEnemyAreaSpawn::OnBoxComponentOverlapBegin(UPrimitiveComponent* Overlapped
 				EnemyCount++;
 				// Spawn enemy
 				UWorld* World = GetWorld();
-				AActor* EnemyInstigator = World->SpawnActor(SpawnedEnemyClass, &SpawnedEnemyLocations[i]);
-				
-				if (APawn* EnemyPawn = Cast<APawn>(EnemyInstigator))
+				if (bShouldSpawnEnemy && World && SpawnedEnemyClass != nullptr && !bShouldAutoSpawn)
 				{
-					EnemyPawn->SpawnDefaultController();
+					AActor* EnemyInstigator = World->SpawnActor(SpawnedEnemyClass, &SpawnedEnemyLocations[i]);
+					if (APawn* EnemyPawn = Cast<APawn>(EnemyInstigator))
+					{
+						EnemyPawn->SpawnDefaultController();
+					}
+                    				
+					EnemyInstigator->OnDestroyed.AddDynamic(this, &AEnemyAreaSpawn::EnemyDestroyed);
 				}
-				
-				EnemyInstigator->OnDestroyed.AddDynamic(this, &AEnemyAreaSpawn::EnemyDestroyed);
 			}
 		}
 	}

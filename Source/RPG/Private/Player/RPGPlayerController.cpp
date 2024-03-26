@@ -70,8 +70,10 @@ void ARPGPlayerController::SetupInputComponent()
 	Super::SetupInputComponent();
 
 	URPGInputComponent* RPGInputComponent = CastChecked<URPGInputComponent>(InputComponent);
-	RPGInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::HandleGroundMovementInput);
+	
+
 	RPGInputComponent->BindAction(ClimbMoveAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::HandleClimbMovementInput);
+	RPGInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::HandleGroundMovementInput);
 	RPGInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &ARPGPlayerController::Look);
 	RPGInputComponent->BindAction(PauseAction, ETriggerEvent::Completed, this, &ARPGPlayerController::TabDown);
 	RPGInputComponent->BindAction(PauseAction, ETriggerEvent::Canceled, this, &ARPGPlayerController::TabUp);
@@ -150,12 +152,12 @@ void ARPGPlayerController::Tick(float DeltaSeconds)
 
 void ARPGPlayerController::HandleGroundMovementInput(const FInputActionValue& Value)
 {
-	if(bTabDown || bPauseReadingBook) return;
+	if(bTabDown || bPauseToReadMessage) return;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputPressed))
 	{
 		return;
 	}
-	const FVector2D MovementVector = Value.Get<FVector2D>();
+	MovementVector = Value.Get<FVector2D>();
 	const FRotator Rotation = GetControlRotation();
 	const FRotator YawRotation(0.f, Rotation.Yaw, 0.f);
 
@@ -170,6 +172,11 @@ void ARPGPlayerController::HandleGroundMovementInput(const FInputActionValue& Va
 			PlayerCharacter->AddMovementInput(CameraForwardDirection, MovementVector.Y);
 			PlayerCharacter->AddMovementInput(RightDirection, MovementVector.X);
 		}
+		else if(bIsGliding)
+		{
+			const FVector CameraForwardDirection = PlayerCharacter->GetCameraComponent()->GetForwardVector();
+			PlayerCharacter->AddMovementInput(CameraForwardDirection, MovementVector.Y);
+		}
 		else
 		{
 			PlayerCharacter->AddMovementInput(ForwardDirection, MovementVector.Y);
@@ -181,7 +188,7 @@ void ARPGPlayerController::HandleGroundMovementInput(const FInputActionValue& Va
 void ARPGPlayerController::HandleClimbMovementInput(const FInputActionValue& Value)
 {
 	UCustomMovementComponent* CustomMovementComponent = Cast<UCustomMovementComponent>(GetCharacter()->GetCharacterMovement());
-	const FVector2D MovementVector = Value.Get<FVector2D>();
+	MovementVector = Value.Get<FVector2D>();
 	const FVector ForwardDirection = FVector::CrossProduct(
 	-CustomMovementComponent->GetClimbableSurfaceNormal(), GetCharacter()->GetActorRightVector()
 	);
@@ -243,7 +250,7 @@ void ARPGPlayerController::OnClimbHopActionStarted(const FInputActionValue& Valu
 
 void ARPGPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 {
-	if (bTabDown) return;
+	if (bTabDown || bReadingBook) return;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputPressed))
 	{
 		return;
@@ -253,7 +260,7 @@ void ARPGPlayerController::AbilityInputTagPressed(FGameplayTag InputTag)
 
 void ARPGPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 {
-	if (bTabDown) return;
+	if (bTabDown || bReadingBook) return;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputReleased))
 	{
 		return;
@@ -263,7 +270,7 @@ void ARPGPlayerController::AbilityInputTagReleased(FGameplayTag InputTag)
 
 void ARPGPlayerController::AbilityInputTagHeld(FGameplayTag InputTag)
 {
-	if (bTabDown) return;
+	if (bTabDown || bReadingBook) return;
 	if (GetASC() && GetASC()->HasMatchingGameplayTag(FRPGGameplayTags::Get().Player_Block_InputHeld))
 	{
 		return;
@@ -307,7 +314,8 @@ void ARPGPlayerController::LineTraceFromScreenCenter(FHitResult &HitResult, ECol
 	bool bScreenToWorld = UGameplayStatics::DeprojectScreenToWorld(this, CenterScreen, CameraLocation, CameraDirection);
 	if (bScreenToWorld)
 	{
-		const FVector Start = CameraLocation;
+		const FVector Start = CameraLocation + CameraDirection * LineTraceCameraStart;
+		//DrawDebugSphere(GetWorld(), Start, 10.f, 12, FColor::Red, false, 5.f);
 		const FVector End = Start + CameraDirection * 50'000.f;
 		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, TraceChannel);
 	}

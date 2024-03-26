@@ -15,7 +15,8 @@ enum class ECharacterClass : uint8
 {
 	Elementalist,
 	Warrior,
-	Ranger
+	Ranger,
+	Boss
 };
 
 USTRUCT(BlueprintType)
@@ -32,6 +33,7 @@ struct FCharacterClassDefaultInfo
 	UPROPERTY(EditDefaultsOnly, Category = "Class Defaults")
 	FScalableFloat XPReward = FScalableFloat();
 };
+
 
 /**
  * 
@@ -59,5 +61,7 @@ public:
 	TObjectPtr<UCurveTable> DamageCalculationsCoefficients;
 	
 	FCharacterClassDefaultInfo GetClassDefaultInfo(ECharacterClass CharacterClass);
+
+	FCharacterClassDefaultInfo SetClassDefaultInfo(ECharacterClass CharacterClass, FCharacterClassDefaultInfo ClassDefaultInfo);
 	
 };

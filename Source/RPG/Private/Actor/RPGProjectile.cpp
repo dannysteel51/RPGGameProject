@@ -55,6 +55,7 @@ void ARPGProjectile::OnHit()
 
 void ARPGProjectile::Destroyed()
 {
+	if (!LoopingSoundComponent) return;
 	if (LoopingSoundComponent)
 	{
 		LoopingSoundComponent->Stop();

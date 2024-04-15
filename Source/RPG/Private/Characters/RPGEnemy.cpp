@@ -49,7 +49,7 @@ void ARPGEnemy::PossessedBy(AController* NewController)
 	RPGAIController->RunBehaviorTree(BehaviorTree);
 	RPGAIController->GetBlackboardComponent()->InitializeBlackboard(*BehaviorTree->BlackboardAsset);
 	RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("HitReacting"), false);
-	RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), CharacterClass != ECharacterClass::Warrior);
+	RPGAIController->GetBlackboardComponent()->SetValueAsBool(FName("RangedAttacker"), CharacterClass != ECharacterClass::Warrior || CharacterClass != ECharacterClass::Boss);
 }
 
 int32 ARPGEnemy::GetPlayerLevel_Implementation()
@@ -171,7 +171,7 @@ void ARPGEnemy::SpawnWeapon() const
 
 void ARPGEnemy::SpawnEffect() const
 {
-	UWorld* World = GetWorld();
+	const UWorld* World = GetWorld();
 	if (World && SpawnEffectParticle)
 	{
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(World, SpawnEffectParticle, GetActorLocation() + FVector(0.f, 0.f, 50.f));

@@ -317,13 +317,15 @@ void ARPGPlayerController::LineTraceFromScreenCenter(FHitResult &HitResult, ECol
 		const FVector Start = CameraLocation + CameraDirection * LineTraceCameraStart;
 		//DrawDebugSphere(GetWorld(), Start, 10.f, 12, FColor::Red, false, 5.f);
 		const FVector End = Start + CameraDirection * 50'000.f;
-		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, TraceChannel);
+		FCollisionQueryParams ResponseParams;
+		ResponseParams.AddIgnoredActor(Cast<ARPGCharacter>(GetPawn()));
+		GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, TraceChannel, ResponseParams);
 	}
 }
 
 FHitResult ARPGPlayerController::LineTraceForSpells(FHitResult &OutHitResult) 
 {
-	LineTraceFromScreenCenter(OutHitResult, ECC_Target);
+	LineTraceFromScreenCenter(OutHitResult, ECC_Visibility);
 	return OutHitResult;
 }
 

@@ -52,7 +52,7 @@ void AEnemyAreaSpawn::Tick(float DeltaTime)
 void AEnemyAreaSpawn::OnBoxComponentOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool FromSweep, const FHitResult& SweepResult)
 {
-	Debug::Print(FString(TEXT("Overlapped")));
+	// Debug::Print(FString(TEXT("Overlapped")));
 	if (!bAlreadyOverlapped)
 	{
 		if (OtherActor == PlayerCharacter)
@@ -70,7 +70,6 @@ void AEnemyAreaSpawn::OnBoxComponentOverlapBegin(UPrimitiveComponent* Overlapped
 					{
 						EnemyPawn->SpawnDefaultController();
 					}
-                    				
 					EnemyInstigator->OnDestroyed.AddDynamic(this, &AEnemyAreaSpawn::EnemyDestroyed);
 				}
 			}

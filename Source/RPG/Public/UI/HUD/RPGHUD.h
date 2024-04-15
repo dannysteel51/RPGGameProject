@@ -34,7 +34,7 @@ private:
 	UPROPERTY()
 	TObjectPtr<URPGUserWidget> OverlayWidget;
 	
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	TSubclassOf<URPGUserWidget> OverlayWidgetClass;
 
 	UPROPERTY()

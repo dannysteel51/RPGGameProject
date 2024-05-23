@@ -16,7 +16,9 @@
 #include "Player/RPGPlayerState.h"
 #include "UI/HUD/RPGHUD.h"
 #include "MotionWarpingComponent.h"
+#include "VectorTypes.h"
 #include "Components/CustomMovementComponent.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "RPG/DebugHelper.h"
 #include "Windows/WindowsApplication.h"
 
@@ -61,6 +63,29 @@ void ARPGCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 	
+}
+
+AActor* ARPGCharacter::FindClosestCollectableActor(AActor* InActor)
+{
+	InActors.Add(InActor);
+	for (AActor* Actor : InActors)
+	{
+		const ARPGCharacter* RPGCharacter = Cast<ARPGCharacter>(Actor);
+		if (Actor == RPGCharacter) continue;
+		float Old = UKismetMathLibrary::Vector_Distance(Actor->GetActorLocation(), GetActorLocation());
+		NewDistance = FVector::Dist(Actor->GetActorLocation(), GetActorLocation());
+		if (NewDistance < CurrentDistance)
+		{
+			CurrentDistance = NewDistance;
+			ClosestActor = Actor;
+		}
+		else if (NewDistance > CurrentDistance)
+		{
+			CurrentDistance = CurrentDistance;
+			ClosestActor = ClosestActor;
+		}
+	}
+	return ClosestActor;
 }
 
 

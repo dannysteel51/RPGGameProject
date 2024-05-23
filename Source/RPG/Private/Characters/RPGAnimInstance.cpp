@@ -27,6 +27,7 @@ void URPGAnimInstance::NativeUpdateAnimation(float DeltaTime)
 	GetInBowShotLoop();
 	GetIsStunned();
 	GetIsInteractingWithBox();
+	GetIsSpeedBurstActive();
 }
 
 void URPGAnimInstance::NativeInitializeAnimation()
@@ -112,5 +113,10 @@ void URPGAnimInstance::GetIsStunned()
 void URPGAnimInstance::GetIsInteractingWithBox()
 {
 	IsInteractingWithBox = Character->bIsInteractingWithBox;
+}
+
+void URPGAnimInstance::GetIsSpeedBurstActive()
+{
+	bIsSpeedBurstActive = Character->bIsSpeedBurstActive;
 }
 

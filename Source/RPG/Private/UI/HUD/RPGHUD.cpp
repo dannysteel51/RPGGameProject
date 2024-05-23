@@ -5,6 +5,7 @@
 #include "Blueprint/UserWidget.h"
 #include "UI/Widget/RPGUserWidget.h"
 #include "UI/WidgetController/AttributeMenuWidgetController.h"
+#include "UI/WidgetController/ItemWidgetController.h"
 #include "UI/WidgetController/OverlayWidgetController.h"
 #include "UI/WidgetController/SpellMenuWidgetController.h"
 
@@ -39,6 +40,17 @@ USpellMenuWidgetController* ARPGHUD::GetSpellMenuWidgetController(const FWidgetC
 		SpellMenuWidgetController->BindCallbacksToDependencies();
 	}
 	return SpellMenuWidgetController;
+}
+
+UItemWidgetController* ARPGHUD::GetItemWidgetController(const FWidgetControllerParams& WCParams)
+{
+	if (ItemWidgetController == nullptr)
+	{
+		ItemWidgetController = NewObject<UItemWidgetController>(this, ItemWidgetControllerClass);
+		ItemWidgetController->SetWidgetControllerParams(WCParams);
+		ItemWidgetController->BindCallbacksToDependencies();
+	}
+	return ItemWidgetController;
 }
 
 void ARPGHUD::InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS)

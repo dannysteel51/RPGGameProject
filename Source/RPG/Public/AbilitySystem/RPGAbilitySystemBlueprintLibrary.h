@@ -8,6 +8,7 @@
 #include "AbilitySystem/Data/CharacterClassInfo.h"
 #include "RPGAbilitySystemBlueprintLibrary.generated.h"
 
+class UItemWidgetController;
 class UAbilityInfo;
 struct FWidgetControllerParams;
 struct FGameplayEffectContextHandle;
@@ -40,6 +41,9 @@ public:
 
 	UFUNCTION(BlueprintPure, Category = "AbilitySystemLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
 	static USpellMenuWidgetController* GetSpellMenuWidgetController(const UObject* WorldContextObject);
+
+	UFUNCTION(BlueprintPure, Category = "AbilitySystemLibrary|WidgetController", meta = (DefaultToSelf = "WorldContextObject"))
+	static UItemWidgetController* GetItemWidgetController(const UObject* WorldContextObject);
 
 	/*
 	 * ASC Character Class Defaults
@@ -151,6 +155,9 @@ public:
 	static void GetLivePlayersWithinRadius(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& IgnoreActors, float Radius, const FVector&  SphereOrigin);
 
 	UFUNCTION(BlueprintCallable, Category="AbilitySystemLibrary|GameplayMechanics")
+	static void GetCollectableActorsWithinRadius(const UObject* WorldContextObject, TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& IgnoreActors, float Radius, const FVector&  SphereOrigin);
+
+	UFUNCTION(BlueprintCallable, Category="AbilitySystemLibrary|GameplayMechanics")
 	static void GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors, TArray<AActor*>& OutClosestTargets, const FVector& Origin);
 
 	UFUNCTION(BlueprintPure, Category="AbilitySystemLibrary|GameplayMechanics")
@@ -167,6 +174,7 @@ public:
 
 	static int32 GetExperienceRewardForClassAndLevel(ECharacterClass CharacterClass, int32 CharacterLevel, const UObject* WorldContextObject);
 
-	
+	UFUNCTION(BlueprintCallable, Category="AbilitySystemLibrary|GameplayMechanics")
+	static FHitResult LineTraceFromCharacterCamera(ARPGCharacter* Character, float InDistanceOfTrace);
 };
 

@@ -7,6 +7,7 @@
 #include "RPGAbilitySystemTypes.h"
 #include "RPGGameplayTags.h"
 #include "AbilitySystem/RPGAttributeSet.h"
+#include "Characters/RPGCharacter.h"
 #include "Game/RPGGameModeBase.h"
 #include "Interfaces/CombatInterface.h"
 #include "Kismet/GameplayStatics.h"
@@ -64,6 +65,18 @@ USpellMenuWidgetController* URPGAbilitySystemBlueprintLibrary::GetSpellMenuWidge
 	if (MakeWidgetControllerParam(WorldContextObject, WidgetControllerParams, RPGHud))
 	{
 		return RPGHud->GetSpellMenuWidgetController(WidgetControllerParams);
+	}
+	return nullptr;
+}
+
+UItemWidgetController* URPGAbilitySystemBlueprintLibrary::GetItemWidgetController(
+	const UObject* WorldContextObject)
+{
+	FWidgetControllerParams WidgetControllerParams;
+	ARPGHUD* RPGHud = nullptr;
+	if (MakeWidgetControllerParam(WorldContextObject, WidgetControllerParams, RPGHud))
+	{
+		return RPGHud->GetItemWidgetController(WidgetControllerParams);
 	}
 	return nullptr;
 }
@@ -139,6 +152,22 @@ int32 URPGAbilitySystemBlueprintLibrary::GetExperienceRewardForClassAndLevel(ECh
 	const float XPReward = Info.XPReward.GetValueAtLevel(CharacterLevel);
 
 	return static_cast<int32>(XPReward);
+}
+
+FHitResult URPGAbilitySystemBlueprintLibrary::LineTraceFromCharacterCamera(ARPGCharacter* Character, float InDistanceOfTrace = 750.f)
+{
+	UCameraComponent* Camera = Character->GetCameraComponent();
+	if (Camera == nullptr) return FHitResult();
+	FVector Start = Camera->GetComponentLocation();
+	FVector End = Start + Camera->GetForwardVector() * InDistanceOfTrace;
+	FHitResult HitResult;
+	FCollisionQueryParams CollisionParams;
+	CollisionParams.AddIgnoredActor(Character);
+	if (Character->GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECollisionChannel::ECC_Visibility, CollisionParams))
+	{
+		return HitResult;
+	}
+	return FHitResult();
 }
 
 bool URPGAbilitySystemBlueprintLibrary::IsBlockedHit(const FGameplayEffectContextHandle& EffectContextHandle)
@@ -404,8 +433,27 @@ void URPGAbilitySystemBlueprintLibrary::GetLivePlayersWithinRadius(const UObject
 	}
 }
 
+void URPGAbilitySystemBlueprintLibrary::GetCollectableActorsWithinRadius(const UObject* WorldContextObject,
+	TArray<AActor*>& OutOverlappingActors, const TArray<AActor*>& IgnoreActors, float Radius,
+	const FVector& SphereOrigin)
+{
+	FCollisionQueryParams SphereParams;
+	SphereParams.AddIgnoredActors(IgnoreActors);
+
+	// query scene to see what we hit
+	TArray<FOverlapResult> Overlaps;
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		World->OverlapMultiByObjectType(Overlaps, SphereOrigin, FQuat::Identity, FCollisionObjectQueryParams(FCollisionObjectQueryParams::InitType::AllDynamicObjects), FCollisionShape::MakeSphere(Radius), SphereParams);
+		for (FOverlapResult& Overlap : Overlaps)
+		{
+			OutOverlappingActors.AddUnique(Overlap.GetActor());
+		}
+	}
+}
+
 void URPGAbilitySystemBlueprintLibrary::GetClosestTargets(int32 MaxTargets, const TArray<AActor*>& Actors,
-	TArray<AActor*>& OutClosestTargets, const FVector& Origin)
+                                                          TArray<AActor*>& OutClosestTargets, const FVector& Origin)
 {
 	if (Actors.Num() <= MaxTargets)
 	{

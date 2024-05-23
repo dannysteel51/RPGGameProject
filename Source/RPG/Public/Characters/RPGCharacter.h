@@ -41,6 +41,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsInteractingWithBox = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bIsSpeedBurstActive = false;
+
 	/*
 	 * CombatInterface
 	 */
@@ -87,6 +90,31 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	/*
+	 * Collectable Pickup
+	 */
+	UPROPERTY()
+	TArray<AActor*> InActors;
+
+	UPROPERTY()
+	TArray<AActor*> ActorsToIgnore;
+
+	UPROPERTY()
+	float NewDistance = 0.0f;
+
+	UPROPERTY()
+	float CurrentDistance = 10000.0f;
+
+	UPROPERTY()
+	AActor* ClosestActor = nullptr;
+	
+	UFUNCTION(BlueprintCallable)
+	AActor* FindClosestCollectableActor(AActor* InActor);
+
+	/*
+	 * End Collectable Pickup
+	 */
+	
 	UPROPERTY()
 	AItem* OverlappingItem = nullptr;
 	

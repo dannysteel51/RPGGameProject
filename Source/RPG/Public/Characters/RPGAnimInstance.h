@@ -81,5 +81,9 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
 	bool IsInteractingWithBox;
 	void GetIsInteractingWithBox();
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = reference, meta = (AllowPrivateAccess = "true"))
+	bool bIsSpeedBurstActive;
+	void GetIsSpeedBurstActive();
 };
 

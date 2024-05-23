@@ -33,8 +33,7 @@ struct  FUIWidgetRow : public FTableRowBase
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnAttributeChangedSigniture, float, NewValue);
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FMessageWidgetRowSigniture, FUIWidgetRow, Row);
-
-
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnHotBarTextureChange, UTexture2D*, NewTexture);
 
 /**
  * 
@@ -44,8 +43,17 @@ class RPG_API UOverlayWidgetController : public URPGWidgetController
 	GENERATED_BODY()
 
 public:
+	
+	UOverlayWidgetController();
+
 	virtual void BroadcastInitialValues() override;
 	virtual void BindCallbacksToDependencies() override;
+	
+	UPROPERTY(BlueprintAssignable, Category = "Items")
+    FOnHotBarTextureChange OnHotBarTextureChange;
+    
+    UFUNCTION(BlueprintCallable, Category = "Items")
+    void ItemTextureChange(UTexture2D* NewTexture);
 
 	UPROPERTY(BlueprintAssignable, Category = "GAS|Attributes")
 	FOnAttributeChangedSigniture OnHealthChanged;

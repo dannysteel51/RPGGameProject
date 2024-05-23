@@ -13,8 +13,6 @@
 #include "GameFramework/Character.h"
 #include "Input/RPGInputComponent.h"
 #include "Kismet/GameplayStatics.h"
-#include "RPG/DebugHelper.h"
-#include "RPG/RPG.h"
 #include "UI/Widget/DamageTextComponent.h"
 
 

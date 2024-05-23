@@ -45,16 +45,12 @@ void ADungeonTravelEntrance::OnSphereOverlap(UPrimitiveComponent* OverlappedComp
 	const AActor* Player = Cast<ARPGCharacter>(UGameplayStatics::GetPlayerCharacter(this, 0));
 	if (OtherActor == Player)
 	{
-		const FVector ActorExitLocation = GetActorLocation() + FVector(0.f, SpawnDistanceFromExit, 0.f);
+		const FVector ActorExitLocation = Player->GetActorLocation() + FVector(0.f, SpawnDistanceFromExit, 0.f);
 		URPGGameInstance* GameInstance = Cast<URPGGameInstance>(GetGameInstance());
 		if(IsValid(GameInstance))
 		{
-			
 			GameInstance->PlayerEntranceLocation = ActorExitLocation;
 			UGameplayStatics::OpenLevel(GetWorld(), "FirstDungeon");
-			UGameplayStatics::PlaySoundAtLocation(this, EntranceSound, Player->GetActorLocation());
-			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), EntranceEffect, GetActorLocation());
-			
 		}
 	}
 }

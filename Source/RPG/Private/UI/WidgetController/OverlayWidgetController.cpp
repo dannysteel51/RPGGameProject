@@ -10,6 +10,10 @@
 #include "AbilitySystem/Data/LevelUpInfo.h"
 #include "Player/RPGPlayerState.h"
 
+UOverlayWidgetController::UOverlayWidgetController()
+{
+}
+
 void UOverlayWidgetController::BroadcastInitialValues()
 {
 	OnHealthChanged.Broadcast(GetRPGAttributeSet()->GetHealth());
@@ -89,6 +93,11 @@ void UOverlayWidgetController::BindCallbacksToDependencies()
 		}
 	);
 	}
+}
+
+void UOverlayWidgetController::ItemTextureChange(UTexture2D* NewTexture)
+{
+	OnHotBarTextureChange.Broadcast(NewTexture);
 }
 
 void UOverlayWidgetController::OnXPChanged(int32 NewXP) 

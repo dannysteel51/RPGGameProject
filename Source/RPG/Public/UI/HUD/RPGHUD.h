@@ -6,6 +6,7 @@
 #include "GameFramework/HUD.h"
 #include "RPGHUD.generated.h"
 
+class UItemWidgetController;
 class UAttributeSet;
 class UAbilitySystemComponent;
 class USpellMenuWidgetController;
@@ -26,6 +27,7 @@ public:
 	UOverlayWidgetController* GetOverlayWidgetController(const FWidgetControllerParams& WCParams);
 	UAttributeMenuWidgetController* GetAttributeMenuWidgetController(const FWidgetControllerParams& WCParams);
 	USpellMenuWidgetController* GetSpellMenuWidgetController(const FWidgetControllerParams& WCParams);
+	UItemWidgetController* GetItemWidgetController(const FWidgetControllerParams& WCParams);
 
 	void InitOverlay(APlayerController* PC, APlayerState* PS, UAbilitySystemComponent* ASC, UAttributeSet* AS);
 	
@@ -54,6 +56,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<USpellMenuWidgetController> SpellMenuWidgetControllerClass;
+
+	UPROPERTY()
+	TObjectPtr<UItemWidgetController> ItemWidgetController;
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UItemWidgetController> ItemWidgetControllerClass;
 
 protected:
 	

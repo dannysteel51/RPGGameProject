@@ -439,7 +439,7 @@ bool UCustomMovementComponent::CanStartVaulting(FVector& OutVaultStartPosition, 
 
 		const FVector End = Start + ComponentDown * 100.f * (i + 1);
 
-		FHitResult VaultTraceHit = DoLineTraceSingleByObject(Start, End, true, true);
+		FHitResult VaultTraceHit = DoLineTraceSingleByObject(Start, End, false, false);
 
 		if (i == 0 && VaultTraceHit.bBlockingHit)
 		{
@@ -507,7 +507,6 @@ void UCustomMovementComponent::OnClimbMontageEnded(UAnimMontage* Montage, bool b
 	{
 		SetMovementMode(MOVE_Walking);
 	}
-		
 }
 
 void UCustomMovementComponent::SetMotionWarpTarget(const FName& InWarpTargetName, const FVector& InTargetPosition)
